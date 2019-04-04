@@ -9,7 +9,7 @@
 // if length(weights) == 1, an unweighted average is computed.
 // tracks ancestry of particles if desired.
 // returns all of the above in a named list.
-pomp_interval = require('./pomp_internal.js')
+resample = require('./resample.js')
 
 
 // weights from dmeasure with logScale = 0
@@ -182,7 +182,7 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
       pt = newparams
     }
     // resample
-    pomp_interval.nosort_resamp(nreps,weights,np,sample,0)
+    resample.nosort_resamp(nreps,weights,np,sample,0)
     for (k = 0; k < np; k++) { // copy the particles
       for (j = 0; j < nvars; j++) {
         for (g = 0; g < nvars; g++) {
