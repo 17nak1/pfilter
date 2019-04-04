@@ -13,7 +13,7 @@ pomp_interval = require('./pomp_internal.js')
 
 
 // weights from dmeasure with logScale = 0
-pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtmean = 0,  trackancestry = 0,  doparRS = 0,
+pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtmean = 0,  trackancestry = 0,  doparRS = 0,
   weights, tol) {
 
   var nprotect = 0
@@ -22,9 +22,9 @@ pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtme
   var ess, fail, loglik
   var newstates = null, newparams = null
   var retval, retvalnames
-  const char = {'variable','rep'}
-  // double *xpm = 0, *xpv = 0, *xfm = 0, *xw = 0, *xx = 0, *xp = 0;
-  // int *xanc = 0;
+  const char = ['variable','rep']
+  let xpm = 0, xpv = 0, xfm = 0, xw = 0, xx = 0, xp = 0
+  let xanc = 0
   var dimX, dimP, newdim, Xnames, Pnames
   var dim, np // int *dim, np;
   var nvars, npars = 0, nreps, nlost
@@ -32,22 +32,22 @@ pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtme
   var sum = 0, sumsq = 0, vsq, ws, w, toler
   var j, k
 
-  // PROTECT(dimX = GET_DIM(x)); nprotect++;
-  dim = dimX// dim = INTEGER(dimX);
+  dimX = [x[0].length,x.length]// dimX = GET_DIM(x)
+  dim = dimX
   nvars = dim[0]; nreps = dim[1];
-  var xx = x // xx = REAL(x);
+  xx = x // xx = REAL(x);
   // PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
 
   // PROTECT(params = as_matrix(params)); nprotect++;
-  // PROTECT(dimP = GET_DIM(params)); nprotect++;
+  dimP = [params[0].length,params.length]//GET_DIM(params)
   dim = dimP
   npars = dim[0]
   if (nreps % dim[1] !== 0)
     throw "ncol('states') should be a multiple of ncol('params')"
   // PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
 
-  // np = *(INTEGER(AS_INTEGER(Np))); // number of particles to resample
-  np = Np
+  np = Np// np = *(INTEGER(AS_INTEGER(Np))); // number of particles to resample
+  
   // do_pm = *(LOGICAL(AS_LOGICAL(predmean))); // calculate prediction means?
   // do_pv = *(LOGICAL(AS_LOGICAL(predvar)));  // calculate prediction variances?
   // do_fm = *(LOGICAL(AS_LOGICAL(filtmean))); // calculate filtering means?
@@ -56,7 +56,7 @@ pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtme
   // do_pr = *(LOGICAL(AS_LOGICAL(doparRS)));
   do_pm = predmean
   do_pv = predvar
-  do_fm = filterMean
+  do_fm = filtmean
   do_ta = trackancestry
   do_pr = doparRS
 
@@ -110,7 +110,7 @@ pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtme
     xfm = fm
   }
 
-  if (doFilterMean) {
+  if (do_fm) {
      fm = nvars
     xfm = fm
   }
@@ -193,6 +193,7 @@ pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtme
         for (j = 0; j < npars; j++) {
           for (g = 0; g < npars; g++) {
             pt[sample[k]][g] = xp[sample[k]][g]
+          }
         }
       }
       if (do_ta) {
@@ -216,7 +217,7 @@ pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtme
     }
   }
 
-  PutRNGstate()
+  // PutRNGstate()
   let returnX = 0; returnPm = 0; returnPv = 0; returnFm = 0; returnAnc = 0
   if (all_fail) {
     returnX = x
@@ -241,4 +242,7 @@ pfilterComputations = function (X, params, Np, predmean = 0, predvar = 0, filtme
   console.log(returnValues)
   return returnValues
 }
+
+//Example
+pfilterComputations([[1,1,1]], [[1,.1,.1,1]], 3, 0,  0,  0,   0,  0,[.3,.3,.3], 1e-17)
 
