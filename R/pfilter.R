@@ -9,3 +9,4 @@ pfilter(m1,params=current_params,Np=10,filter.mean = T,pred.mean=T,pred.var=T,sa
 # ss ye clasee ke toosh matrix hate mokhtalef dare. Mitooni spred.mean ro baraye moghayese estefade koni ke ye matrix 5* (toole baze zaman)
 # hast. satre aval "S" ro mitooni ba in dastoor bebini.
 ss@pred.mean[1,]
+
