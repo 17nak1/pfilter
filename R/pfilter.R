@@ -7,6 +7,7 @@ rproc <- Csnippet("
                   double births, va, tt;
                   double rate[6], trans[6];
                   
+
                   va = 0;
                   
                   
