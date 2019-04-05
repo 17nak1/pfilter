@@ -1,7 +1,5 @@
 library(pomp)
 
-# mainDir <- "~/Documents/R/StochasticSEIR"
-# setwd(mainDir)
 ######################################################  Model Snippet
 rproc <- Csnippet("
                   double seas, beta, foi;
