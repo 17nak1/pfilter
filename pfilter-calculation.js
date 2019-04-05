@@ -77,8 +77,8 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
   xw = weights
   toler = tol  // failure tolerance
   // check the weights and compute sum and sum of squares
-  var  w = 0, ws = 0, nlost = 0
-  for ( i = 0; i < nreps; i++) {
+  
+  for (k = 0, w = 0, ws = 0, nlost = 0; k < nreps; k++) {
     if (xw[k] > toler) {
       w += xw[k]
       ws += xw[k] * xw[k]
@@ -185,30 +185,29 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     }
     // resample
     sample = resample.nosort_resamp(nreps,weights,np,sample,0)
-    for (k = 0; k < np; k++) { // copy the particles
+    for (k = 0, l = 0; k < np; k++) { // copy the particles
       for (j = 0; j < nvars; j++) {
-        for (g = 0; g < nvars; g++) {
-          st[sample[k]][g] = xx[sample[k]] [g]
-        }
-      }
-      if (do_pr) {
-        for (j = 0; j < npars; j++) {
-          for (g = 0; g < npars; g++) {
-            pt[sample[k]][g] = xp[sample[k]][g]
-          }
-        }
-      }
-      if (do_ta) {
-        xanc[k] = sample[k] + 1
-      } 
+        st[j][l] = xx[j][sample[k]];
+      } ;console.log(st)
+      l++
     }
+    if (do_pr) {
+      for (j = 0; j < npars; j++) {
+        for (g = 0; g < npars; g++) {
+          pt[sample[k]][g] = xp[sample[k]][g]
+        }
+      }
+    }
+    if (do_ta) {
+      xanc[k] = sample[k] + 1
+    } 
 
   } else { // don't resample: just drop 3rd dimension in x prior to return
 
     newdim = new Array(2)
     dim = newdim
     dim[0] = nvars; dim[1] = nreps;
-    x = mypomp_defines.SET_DIM(x,newdim);
+    x = mypomp_defines.SET_DIM(x,newdim)//;console.log(x)
     // console.log(dim, newdim)
     // setrownames(x,Xnames,2);
     // fixdimnames(x,dimnm,2);
@@ -223,9 +222,9 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
   // PutRNGstate()
   let returnX = 0; returnPm = 0; returnPv = 0; returnFm = 0; returnAnc = 0
   if (all_fail) {
-    returnX = x//;console.log(x)
+    returnX = x;console.log(x)
   } else {
-    returnX = newstates//;console.log("!",newstates)
+    returnX = newstates;console.log("!",newstates)
   }
 
   if (do_pm) {
@@ -242,10 +241,10 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
   }
 
   returnValues = {fail:fail, loglik: loglik, ess: ess, states: returnX, params:0, pm: returnPm, pv: returnPv,fm: returnFm, ancestry:returnAnc }  
-  console.log(returnValues)
+  // console.log(returnValues)
   return returnValues
 }
 
 //Example
-pfilterComputations([[1,1,1],[2,2,2]], [[1],[.1],[.1],[.2]], 3, 1,  1,  1,   1,  0,[.01,.9,.01], 1e-17)
+pfilterComputations([[1,2,1],[2,5,1]], [[1],[.1],[.1],[.2]], 3, 1,  1,  1,   1,  0,[.01,.9,.01], 1e-17)
 
