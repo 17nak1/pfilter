@@ -1,3 +1,5 @@
+// Nazila: needs GetRNGstate(), PutRNGstate()
+
 // #include "pomp_internal.h"
 // #include <Rdefines.h>
 
@@ -10,36 +12,36 @@
 // tracks ancestry of particles if desired.
 // returns all of the above in a named list.
 resample = require('./resample.js')
-
+mypomp_defines = require('./mypomp_defines')
 
 // weights from dmeasure with logScale = 0
 pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtmean = 0,  trackancestry = 0,  doparRS = 0,
   weights, tol) {
 
-  var nprotect = 0
-   // Nazila:You use R_NilValue to handle NULL in Rcpp.
+  // You use null to handle NULL in Rcpp.
   var pm = null, pv = null, fm = null, anc = null
   var ess, fail, loglik
   var newstates = null, newparams = null
   var retval, retvalnames
   const char = ['variable','rep']
-  let xpm = 0, xpv = 0, xfm = 0, xw = 0, xx = 0, xp = 0
-  let xanc = 0
+  var xpm = 0, xpv = 0, xfm = 0, xw = 0, xx = 0, xp = 0
+  var xanc = 0
   var dimX, dimP, newdim, Xnames, Pnames
   var dim, np // int *dim, np;
   var nvars, npars = 0, nreps, nlost
   var do_pm, do_pv, do_fm, do_ta, do_pr, all_fail = 0
   var sum = 0, sumsq = 0, vsq, ws, w, toler
+  var returnValues
   var j, k
 
-  dimX = [x[0].length,x.length]// dimX = GET_DIM(x)
+  dimX = mypomp_defines.GET_DIM (x)
   dim = dimX
-  nvars = dim[0]; nreps = dim[1];
+  nvars = dim[0]; nreps = dim[1]
   xx = x // xx = REAL(x);
   // PROTECT(Xnames = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
 
-  // PROTECT(params = as_matrix(params)); nprotect++;
-  dimP = [params[0].length,params.length]//GET_DIM(params)
+  params = mypomp_defines.as_matrix(params)
+  dimP =  mypomp_defines.GET_DIM (params)
   dim = dimP
   npars = dim[0]
   if (nreps % dim[1] !== 0)
@@ -68,15 +70,15 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
   // PROTECT(ess = NEW_NUMERIC(1)); nprotect++; // effective sample size
   // PROTECT(loglik = NEW_NUMERIC(1)); nprotect++; // log likelihood
   // PROTECT(fail = NEW_LOGICAL(1)); nprotect++; // particle failure?
-  ess = 1
-  loglik = 1
-  fail = 1
+  ess = []
+  loglik = []
+  fail = []
 
   xw = weights
   toler = tol  // failure tolerance
   // check the weights and compute sum and sum of squares
-  var  w = 0, ws = 0, nlost = 0
-  for ( i = 0; i < nreps; i++) {
+  
+  for (k = 0, w = 0, ws = 0, nlost = 0; k < nreps; k++) {
     if (xw[k] > toler) {
       w += xw[k]
       ws += xw[k] * xw[k]
@@ -101,22 +103,22 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
   
   
   if (do_pm || do_pv) {
-    pm = nvars
+    pm = new Array(nvars)
     xpm = pm
   }
   
   if (do_pv) {
-    fm = nvars
-    xfm = fm
+    pv = new Array(nvars)
+    xpv = pv
   }
 
   if (do_fm) {
-     fm = nvars
+    fm = new Array(nvars)
     xfm = fm
   }
 
   if (do_ta) {
-    anc = np
+    anc = new Array(np)
     xanc = anc
   }
   
@@ -125,7 +127,7 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     // compute prediction mean
     if (do_pm || do_pv) {
       for (k = 0, sum = 0; k < nreps; k++) {
-        sum += xx[k][j]
+        sum += xx[j][k]
       } 
       sum /= nreps
       xpm[j] = sum
@@ -134,7 +136,7 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     // compute prediction variance
     if (do_pv) {
       for (k = 0, sumsq = 0; k < nreps; k++) {
-        vsq = xx[k][j] - sum
+        vsq = xx[j][k] - sum
         sumsq += vsq * vsq
       }
       xpv[j] = sumsq / (nreps - 1)
@@ -144,12 +146,12 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     if (do_fm) {
       if (all_fail) {   // unweighted average
         for (k = 0, ws = 0; k < nreps; k++) {
-          ws += xx[k][j]
+          ws += xx[j][k]
         }
         xfm[j] = ws/ nreps
       } else {      // weighted average
         for (k = 0, ws = 0; k < nreps; k++) {
-          ws += xx[k][j] * xw[k]
+          ws += xx[j][k] * xw[k]
         }
         xfm[j] = ws / w
       }
@@ -158,7 +160,7 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
   }
   // GetRNGstate();
 
-
+// all_fail = 0
   // resample the particles unless we have filtering failure
   if (!all_fail) {
     var xdim = new Array(2)
@@ -166,7 +168,7 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     let ss = 0, st = 0, ps = 0, pt = 0
     // create storage for new states
     xdim[0] = nvars; xdim[1] = np
-    newparams = new Array(xdim[0])(null).map(() => Array(xdim[1]))// newstates = makearray(2,xdim)
+    newstates = mypomp_defines.makearray(2,xdim)
     // setrownames(newstates,Xnames,2);
     // fixdimnames(newstates,dimnm,2);
     ss = x
@@ -175,20 +177,19 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     // create storage for new parameters
     if (do_pr) {
       xdim[0] = npars; xdim[1] = np;
-      newparams = new Array(xdim[0])(null).map(() => Array(xdim[1]))// newparams = makearray(2,xdim)
+      newparams = mypomp_defines.makearray(2,xdim)
       // setrownames(newparams,Pnames,2);
       // fixdimnames(newparams,dimnm,2);
       ps = params
       pt = newparams
     }
     // resample
-    resample.nosort_resamp(nreps,weights,np,sample,0)
-    for (k = 0; k < np; k++) { // copy the particles
+    sample = resample.nosort_resamp(nreps,weights,np,sample,0)
+    for (k = 0, l = 0; k < np; k++) { // copy the particles
       for (j = 0; j < nvars; j++) {
-        for (g = 0; g < nvars; g++) {
-          ss[sample[k]][g] = xx[sample[k]] [g]
-        }
-      }
+        st[j][l] = xx[j][sample[k]];
+      } 
+      l++
       if (do_pr) {
         for (j = 0; j < npars; j++) {
           for (g = 0; g < npars; g++) {
@@ -197,19 +198,18 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
         }
       }
       if (do_ta) {
-        xanc[k] = sample[k] + 1
+        xanc[k] = sample[k] + 1; 
       } 
     }
-
   } else { // don't resample: just drop 3rd dimension in x prior to return
 
-    newdim = 2
+    newdim = new Array(2)
     dim = newdim
     dim[0] = nvars; dim[1] = nreps;
-    // SET_DIM(x,newdim);
+    x = mypomp_defines.SET_DIM(x,newdim)//;console.log(x)
+    // console.log(dim, newdim)
     // setrownames(x,Xnames,2);
     // fixdimnames(x,dimnm,2);
-
     if (do_ta){
       for (k = 0; k < np; k++) {
        xanc[k] = k + 1
@@ -229,7 +229,7 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     returnPm = pm
   }
   if (do_pv) {
-    returnPv = pv
+    returnPv = xpv
   }
   if (do_fm) {
     returnFm = fm
@@ -238,11 +238,11 @@ pfilterComputations = function (x, params, Np, predmean = 0, predvar = 0, filtme
     returnAnc = anc
   }
 
-  var returnValues = {fail:fail, loglik: loglik, ess: ess, states: returnX, params:0, pm: returnPm, pv: returnPv,fm: returnFm, ancestry:returnAnc }  
+  returnValues = {fail:fail, loglik: loglik, ess: ess, states: returnX, params:0, pm: returnPm, pv: returnPv,fm: returnFm, ancestry:returnAnc }  
   console.log(returnValues)
   return returnValues
 }
 
 //Example
-pfilterComputations([[1,1,1]], [[1,.1,.1,1]], 3, 0,  0,  0,   0,  0,[.3,.3,.3], 1e-17)
+pfilterComputations([[1,2,1],[2,5,1]], [[1],[.1],[.1],[.2]], 3, 1,  1, 1, 1, 0, [.01,.8,.1], 1e-17)
 
