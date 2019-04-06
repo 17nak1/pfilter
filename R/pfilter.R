@@ -1,13 +1,12 @@
-library(pomp)
 
 ######################################################  Model Snippet
 rproc <- Csnippet("
                   double seas, beta, foi;
                   double births, va, tt;
                   double rate[6], trans[6];
-                  
-                  
-                  
+
+
+
                   //Vacination uptake
                   if (t < 1968)
                   va = 0;
@@ -93,27 +92,27 @@ rproc <- Csnippet("
                   va = 0.88;
                   else
                   va = 0.89;
-                  
-                  
+
+
                   // term-time seasonality
                   tt = (t-floor(t))*365.25;
                   if ((tt>=7&&tt<=100) || (tt>=115&&tt<=199) || (tt>=252&&tt<=300) || (tt>=308&&tt<=356))
                   seas = 1.0+amplitude*0.2411/0.7589;
                   else
                   seas = 1.0-amplitude;
-                  
+
                   // transmission rate
                   beta = R0*(gamma+mu)*(sigma+mu)*seas/sigma;  //seasonal transmission rate
                   // expected force of infection
                   foi = beta*I/pop;
-                  
+
                   rate[0] = foi;  //         force of infection
                   rate[1] = mu;             // natural S death
                   rate[2] = sigma;        // rate of ending of latent stage
                   rate[3] = mu;             // natural E death
                   rate[4] = gamma;        // recovery
                   rate[5] = mu;             // natural I death
-                  //if( t<=1944.03832991103 && t>=1944.03832991102) 
+                  //if( t<=1944.03832991103 && t>=1944.03832991102)
                   //printf(\"%f and %f \\n\", t, foi);
                   // Poisson births
                   births = rpois(birthrate*(1-va)*dt);
@@ -156,7 +155,7 @@ dmeas <- Csnippet("
                   }
                   ")
 rmeas <- Csnippet("
-                  
+
                   double m = rho*H;
                   double v = m*(1.0-rho+psi*psi*m);
                   double tol = 1.0e-18;
@@ -201,8 +200,8 @@ statenames <- c("S","E","I","R","H")
 
 zeronames <- c("H")
 #########################################            data
-London_BiData <- read.csv(file.path("~/Git/pfilter/R", "London_BiData.csv"))
-London_covar <- read.csv(file.path("~/Git/pfilter/R", "London_covar.csv"))
+London_BiData <- read.csv(file.path("D:/source/repos/pfilter/R", "London_BiData.csv"))
+London_covar <- read.csv(file.path("D:/source/repos/pfilter/R", "London_covar.csv"))
 #########################################       make pomp
 pomp(
   data = London_BiData,

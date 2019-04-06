@@ -1,27 +1,39 @@
 pomp = class pomp {
-    constructor(inputs){
-        this.data = [];
-        this.times = [];
-        this.t0 = 0;
-        this.timename = 'time';
-        this.rinit= { def :'pomp_fun(slotname=rinit)'};
-        this.rprocess = { def :'rproc_plugin()'};
-        this.dprocess = { def :'pomp_fun(slotname=dprocess)'};
-        this.rmeasure = { def :'pomp_fun(slotname=rmeasure)'};
-        this.dmeasure = { def :'pomp_fun(slotname=dmeasure)'};
-        this.rprior = { def :'pomp_fun(slotname=rprior)'};
-        this.dprior = { def :'pomp_fun(slotname=dprior)'};
-        this.skeleton = { def :'skel_plugin()'};
-        this.partrans = { def :'parameter_trans()'};
-        this.params = 0;
-        this.states = [];
-        this.covar = { def :'covariate_table()'};
-        this.accumvars = '';
-        this.solibs = {};
-        this.userdata = {}
-    }
-    construct_pomp(inputs){
+    constructor(){
 
+        this.t0 = 0;
+        this.params = {};
+        this.states = {};
+        this.data = {};
+        this.covar = {};
+        this.covar.curent = {};
+        this.initializer = {};
+        this.x = [];
+    }
+    readData(obj,fileaddress,timesname){
+        obj.timesname = timesname;
+        obj.cname = []
+        obj.rows = []
+        var temp = fs.readFileSync(fileaddress).toString()
+        temp = temp.replace(/\r/g,'');
+        temp = temp.replace(/\"/g,'');
+        var lines = temp.split('\n')
+        obj.cname = lines[0].split(',')
+        for (let i = 1; i < lines.length; i++) {
+            obj.rows.push(lines[i].split(','))
+        }
+    }
+
+    pfilter(np){        
+        let covartimeindex = this.covar.cname.indexOf(this.covar.timesname);
+        if(this.t0 == this.covar.rows[0][covartimeindex]){
+            //foreach read and make object covar curent
+        } else{
+            // function tu create t0 value
+            this.covar.curent.pop = 1326748;
+        }
+        var obj = Object.assign({}, this.params.current, this.covar.curent);
+        var res = this.initializer(obj);
     }
 }
 
