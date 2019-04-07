@@ -1,31 +1,41 @@
 let pomp = require('./src/pomp/index.js');
-let pfilter = require('./src/pfilter/pfilter.js');
 fs = require('fs')
+const libR = require('lib-r-math.js')
+const {
+Poisson,
+rng: { MersenneTwister },
+rng: { normal: { Inversion } }
+} = libR
+const mt = new MersenneTwister(0)//
+const { rpois } = Poisson(new Inversion(mt))
+mt.init(1234)
 
 pomp.pompclass.t0=1940;
+pomp.pompclass.dt=1/365.25;
 pomp.pompclass.params.names = ['R0','amplitude','gamma','mu','sigma','rho','psi'];
+pomp.pompclass.params.current = { R0:3.132490e+01 , amplitude:3.883620e-01 , gamma:7.305000e+01 , mu:6.469830e-04 , sigma:4.566000e+01 ,rho: 4.598709e-01 ,psi: 1.462546e-01 };
 pomp.pompclass.states.names = ['S','E','I','R','H'];
+pomp.pompclass.states.current = { S: 3.399189e-02 ,E:2.336327e-04 ,R:9.657741e-01,I:4.221789e-07 }
 pomp.pompclass.states.zeronames = ['H'];
-pomp.pompclass.params.current = { R0:3.132490e+01 , amplitude:3.883620e-01 , gamma:7.305000e+01 , mu:6.469830e-04 , sigma:4.566000e+01 ,rho: 4.598709e-01 ,psi: 1.462546e-01 ,S: 3.399189e-02 ,E:2.336327e-04 ,R:9.657741e-01,I:4.221789e-07};
 
 pomp.pompclass.readData(pomp.pompclass.data,'./src/London_BiData.csv','time');
 pomp.pompclass.readData(pomp.pompclass.covar,'./src/London_covar.csv','time');
 
-pomp.pompclass.initializer = obj => {
+pomp.pompclass.initializer = (states,params,covar) => {
     res = {};
-    m = obj.pop/(obj.S+obj.E+obj.I+obj.R);
-    res.S = Math.round(m*obj.S);
-    res.E = Math.round(m*obj.E);
-    res.I = Math.round(m*obj.I);
-    res.R = Math.round(m*obj.R);
+    m = covar.pop/(states.S+states.E+states.I+states.R);
+    res.S = Math.round(m*states.S);
+    res.E = Math.round(m*states.E);
+    res.I = Math.round(m*states.I);
+    res.R = Math.round(m*states.R);
     res.H = 0;
     return res;
 }
 
-pomp.pompclass.rprocess = obj => {
-                  var seas, beta, foi;
-                  var births, va, tt;
-                  var rate = [6], trans =[6];
+pomp.pompclass.rprocess = (t,dt,states,params,covar) => {
+                  let seas, beta, foi;
+                  let births, va, tt;
+                  let rate = [6], trans =[6];
 
 
 
@@ -117,39 +127,39 @@ pomp.pompclass.rprocess = obj => {
 
 
                   // term-time seasonality
-                  tt = (t-floor(t))*365.25;
+                  tt = (t-Math.floor(t))*365.25;
                   if ((tt>=7&&tt<=100) || (tt>=115&&tt<=199) || (tt>=252&&tt<=300) || (tt>=308&&tt<=356))
-                  seas = 1.0+amplitude*0.2411/0.7589;
+                  seas = 1.0+params.amplitude*0.2411/0.7589;
                   else
-                  seas = 1.0-amplitude;
+                  seas = 1.0-params.amplitude;
 
                   // transmission rate
-                  beta = R0*(gamma+mu)*(sigma+mu)*seas/sigma;  //seasonal transmission rate
+                  beta = params.R0*(params.gamma+params.mu)*(params.sigma+params.mu)*seas/params.sigma;  //seasonal transmission rate
                   // expected force of infection
-                  foi = beta*I/pop;
+                  foi = beta*states.I/covar.pop;
 
                   rate[0] = foi;  //         force of infection
-                  rate[1] = mu;             // natural S death
-                  rate[2] = sigma;        // rate of ending of latent stage
-                  rate[3] = mu;             // natural E death
-                  rate[4] = gamma;        // recovery
-                  rate[5] = mu;             // natural I death
+                  rate[1] = params.mu;             // natural S death
+                  rate[2] = params.sigma;        // rate of ending of latent stage
+                  rate[3] = params.mu;             // natural E death
+                  rate[4] = params.gamma;        // recovery
+                  rate[5] = params.mu;             // natural I death
                   //if( t<=1944.03832991103 && t>=1944.03832991102)
                   //printf(\"%f and %f \\n\", t, foi);
                   // Poisson births
-                  births = rpois(birthrate*(1-va)*dt);
+                  births = rpois(1,covar.birthrate*(1-va)*dt);
                   // transitions between classes
-                  reulermultinom(2,S,rate[0],dt,trans[0]);
-                  reulermultinom(2,E,rate[2],dt,trans[2]);
-                  reulermultinom(2,I,rate[4],dt,trans[4]);
-                  S += births - trans[0] - trans[1];
-                  E += trans[0] - trans[2] - trans[3];
-                  I += trans[2] - trans[4] - trans[5];
-                  R = pop - S - E - I;
-                  H += trans[4];           // true incidence
+                  pomp.reulermultinom(2,states.S,0,dt,0,rate,trans);
+                  pomp.reulermultinom(2,states.E,2,dt,2,rate,trans);
+                  pomp.reulermultinom(2,states.I,4,dt,4,rate,trans);
+                  states.S += births - trans[0] - trans[1];
+                  states.E += trans[0] - trans[2] - trans[3];
+                  states.I += trans[2] - trans[4] - trans[5];
+                  states.R = covar.pop - states.S - states.E - states.I;
+                  states.H += trans[4];           // true incidence
 }
 
 
-pfilter(pomp,10);
+pomp.pfilter(10);
 
 console.log('Finished');

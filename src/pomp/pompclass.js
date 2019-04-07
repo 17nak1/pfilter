@@ -1,20 +1,26 @@
     
-var readData = function(obj,fileaddress,timesname){
+let readData = function(obj,fileaddress,timesname){
         obj.timesname = timesname;
         obj.cname = []
         obj.rows = []
-        var temp = fs.readFileSync(fileaddress).toString()
+        let temp = fs.readFileSync(fileaddress).toString()
         temp = temp.replace(/\r/g,'');
         temp = temp.replace(/\"/g,'');
-        var lines = temp.split('\n')
+        let lines = temp.split('\n')
         obj.cname = lines[0].split(',')
         for (let i = 1; i < lines.length; i++) {
-            obj.rows.push(lines[i].split(','))
+            let temprow = {};
+            let temprowarr = lines[i].split(',');
+            for(let j =0; j < obj.cname.length; j++){
+                temprow[obj.cname[j]] = temprowarr[j]
+            }
+            obj.rows.push(temprow);
         }
     }
 
 module.exports = {
     t0 : 0,
+    dt : 0,
     params : { names:[],current:{}},
     states : { names:[],zeronames:[]},
     data : { curent : {},timesname:'',cname:'',rows:''},
@@ -24,5 +30,7 @@ module.exports = {
     xstart : [],
     loglik : [],
 
-    readData : readData
+    readData : readData,
+    initializer : {},
+    rprocess : {}
 };
