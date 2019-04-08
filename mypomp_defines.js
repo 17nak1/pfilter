@@ -9,7 +9,7 @@
     dim = new Array(2)
     xdim = dim
     xdim[0] = x.length; xdim[1] = 1;
-    // SET_DIM(x,dim);
+    mypomp_defines.SET_DIM(x,dim);
     // SET_NAMES(x,R_NilValue);
     // setrownames(x,names,2);
   } else if (dim.length ===  1) {
@@ -17,7 +17,7 @@
     dim = new Array(2)
     xdim = dim
     xdim[0] = x.length; xdim[1] = 1;
-    // SET_DIM(x,dim);
+    mypomp_defines.SET_DIM(x,dim);
     // SET_NAMES(x,R_NilValue);
     // setrownames(x,names,2);
   } else if (dim.length > 2) {
@@ -27,7 +27,7 @@
     dim = new Array(2)
     xdim = dim
     xdim[0] = nrow; xdim[1] = ncol;
-    // SET_DIM(x,dim);
+    mypomp_defines.SET_DIM(x,dim);
     // SET_NAMES(x,R_NilValue);
     // setrownames(x,names,2);
   }
@@ -70,8 +70,49 @@ mypomp_defines.makearray = function(rank, dim) {
   }
 }
 
+mypomp_defines.as_state_array =function (x) {
+  
+  var dim, names
+  var xdim, nrow, ncol
+  dim = mypomp_defines.GET_DIM(x)
+  if (dim === null) {
+    // PROTECT(names = GET_NAMES(x)); nprotect++;
+    dim = new Array(3)
+    xdim = dim
+    xdim[0] = x.length; xdim[1] = 1; xdim[2] = 1;
+    mypomp_defines.SET_DIM(x,dim)
+  } else if (dim.length === 1) {
+    dim = new Array(3)
+    xdim = dim
+    xdim[0] = x.length; xdim[1] = 1
+    mypomp_defines.SET_DIM(x,dim)
+  } else if (dim.length === 2) {
+    xdim = dim
+    nrow = xdim[0]; ncol = xdim[1];
+    dim = new Array(3)
+    xdim = dim
+    xdim[0] = nrow; xdim[1] = ncol;
+    mypomp_defines.SET_DIM(x,dim)
+  } else if (dim.length > 3) {
+    // PROTECT(names = GET_ROWNAMES(GET_DIMNAMES(x))); nprotect++;
+    xdim = dim
+    nrow = xdim[0]; ncol = xdim[1];
+    dim = new Array(3);
+    xdim = dim
+    xdim[0] = nrow; xdim[1] = ncol; xdim[2] = x.length / nrow / ncol
+    mypomp_defines.SET_DIM(x,dim)
+    // SET_NAMES(x,R_NilValue);
+    // setrownames(x,names,3);
+  }
+  
+  return x;
+}
+
 
 module.exports = mypomp_defines
- // console.log(mypomp_defines.GET_DIM([1,1]))
- // console.log(mypomp_defines.as_matrix ([1,1]))
+ console.log(mypomp_defines.GET_DIM([]))
+ // console.log(mypomp_defines.as_matrix ([1,2]))
  // console.log(mypomp_defines.SET_DIM([[1,2],[3,4]],[2,2]))
+  console.log(mypomp_defines.as_state_array([1,1]))
+ // console.log(mypomp_defines.as_state_array ([1,2]))
+ console.log(mypomp_defines.as_state_array([[1,2],[3,4],[2,2]]))
