@@ -1,4 +1,5 @@
-// Note: GetRNGstate(), PutRNGstate()
+// Nazila: needs GetRNGstate(), PutRNGstate()
+
 resample = {}
 resample.nosort_resamp  = function (nw, w, np, p, offset) {
   for (j = 1; j < nw; j++) {
@@ -20,6 +21,7 @@ resample.nosort_resamp  = function (nw, w, np, p, offset) {
       p[j] += offset
     }
   }
+  return p
 }
 
 

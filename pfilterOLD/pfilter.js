@@ -141,7 +141,6 @@ function pfilterCalculation (input) {//filter.traj , save.params
       particles[np][3] = R
       particles[np][4] = H
      
-<<<<<<< HEAD
       states[np][0] = S || 0
       states[np][1] = E || 0
       states[np][2] = I || 0
@@ -164,36 +163,6 @@ function pfilterCalculation (input) {//filter.traj , save.params
       let sumOfWeights = 0
       for (let i = 0; i < Np; i++) {
         sumOfWeights += weights[i]
-=======
-    //***********RESAMPLE*************
-    
-    if (k >= Number(dataCases[0][0])){
-      stateSaved.push([S,E,I,R,H])
-      var modelCases = Number(dataCases[timeCountData][1])
-      var likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
-      weights.push(likvalue)
-      particles[np][4] = 0
-    }
-  }////////////////////////////////////////////////////////////////end particle loop///////////////////////////////////////////////////////////////////////////////////////
-  //normalize
-  if (k >= Number(dataCases[0][0])){
-    let sumOfWeights = 0
-    for (let i = 0; i < Np; i++) {
-      sumOfWeights += weights[i]
-    }
-    for (let i = 0; i < Np; i++) {
-      normalWeights[i] = weights[i] / sumOfWeights
-    }
-    // check the weights and compute sum and sum of squares
-    var  w = 0, ws = 0, nlost = 0
-    for (let i = 0; i < Np; i++) {
-      if (weights[i] > toler) {
-        w += weights[i]
-        ws += weights[i] ** 2
-      } else { // this particle is lost
-        weights[i] = 0;
-        nlost++
->>>>>>> 85773d15d317e9c9f6a808d7a5ef8bf5dad5ed66
       }
       for (let i = 0; i < Np; i++) {
         normalWeights[i] = weights[i] / sumOfWeights
