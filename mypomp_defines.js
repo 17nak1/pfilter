@@ -76,7 +76,6 @@ mypomp_defines.as_state_array =function (x) {
   var xdim, nrow, ncol
   dim = mypomp_defines.GET_DIM(x)
   if (dim === null) {
-    // PROTECT(names = GET_NAMES(x)); nprotect++;
     dim = new Array(3)
     xdim = dim
     xdim[0] = x.length; xdim[1] = 1; xdim[2] = 1;
@@ -110,9 +109,5 @@ mypomp_defines.as_state_array =function (x) {
 
 
 module.exports = mypomp_defines
- console.log(mypomp_defines.GET_DIM([]))
- // console.log(mypomp_defines.as_matrix ([1,2]))
- // console.log(mypomp_defines.SET_DIM([[1,2],[3,4]],[2,2]))
-  console.log(mypomp_defines.as_state_array([1,1]))
- // console.log(mypomp_defines.as_state_array ([1,2]))
- console.log(mypomp_defines.as_state_array([[1,2],[3,4],[2,2]]))
+ 
+ 

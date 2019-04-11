@@ -125,30 +125,3 @@ pomp(
        log(params)
      }
      ) -> gompertz
-## the following was used to create the data included
-## simulate(po,nsim=1,seed=299438676L) -> gompertz
-c("gompertz")
-
-# set_dim <- function(x, new_dim,
-#                     pad = getOption("listarrays.autopad_arrays_with", NULL),
-#                     order = c("F", "C"),
-#                     verbose = getOption("verbose")) {
-#   
-#   if (!is.null(pad) && !identical(length(x), needed_len <- prod(new_dim))) {
-#     stopifnot(identical(length(pad), 1L))
-#     if (verbose)
-#       message("Padding vector with ", pad, "s",
-#               " from length ", length(x), " to length ", needed_len)
-#     x <- c(x, rep_len(pad, needed_len - length(x)))
-#   }
-#   
-#   order <- match.arg(order)
-#   if (identical(order, "C"))
-#     dim2(x) <- new_dim
-#   else
-#     dim(x) <- new_dim
-#   
-#   x
-# }
-# x = c(1:4)
-# y = set_dim(x,c(2,3) )

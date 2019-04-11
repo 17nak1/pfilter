@@ -12,7 +12,7 @@ let readData = function(obj,fileaddress,timesname){
             let temprow = {};
             let temprowarr = lines[i].split(',');
             for(let j =0; j < obj.cname.length; j++){
-                temprow[obj.cname[j]] = temprowarr[j]
+                temprow[obj.cname[j]] = +temprowarr[j]
             }
             obj.rows.push(temprow);
         }
