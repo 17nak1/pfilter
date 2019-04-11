@@ -133,6 +133,9 @@ do_dmeasure = function (object, y, x, times, params, log, gnsi) {
   // PROTECT(Pnames = GET_ROWNAMES(GET_DIMNAMES(params))); nprotect++;
   // PROTECT(Cnames = get_covariableiate_names(GET_SLOT(object,install("covariable")))); nprotect++;
 
+
+
+
   // set up the covariableiate table
   covariableiate_table = make_covariableiate_table(GET_SLOT(object,install("covariable")),&ncovariables);
   PROTECT(cvec = NEW_NUMERIC(ncovariables)); nprotect++;
