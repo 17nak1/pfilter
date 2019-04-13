@@ -23,6 +23,7 @@ fs = require('fs')
 let fmin = require ('fmin')
 let mathLib = require('./mathLib')
 let snippet = require('./modelSnippet.js')
+let simulator = require('./simulator.js')
 var linearInterpolator = require('linear-interpolator/node_main')
 
 //////////////////////////////////////////data///////////////////////////////////////
@@ -124,8 +125,8 @@ state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
     k = tdata
   }
   weights = []; normalWeights = []
-  
-  if ( k > t0) {
+  aa = [Np];
+  if ( k >= t0) {
     for (np = 0; np < Np; np++) { // copy the particles
       aa[np] = [].concat(particles[sampleNum[np]])
       aa[np][nvars - 1] = 0
