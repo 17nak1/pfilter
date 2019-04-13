@@ -18,8 +18,8 @@ pomp.pompclass.states.names = ['S','E','I','R','H'];
 pomp.pompclass.states.current = { S: 3.399189e-02 ,E:2.336327e-04 ,R:9.657741e-01,I:4.221789e-07 }
 pomp.pompclass.states.zeronames = ['H'];
 
-pomp.pompclass.readData(pomp.pompclass.data,'../samples/London_BiData.csv','time');
-pomp.pompclass.readData(pomp.pompclass.covar,'../samples/London_covar.csv','time');
+pomp.pompclass.readData(pomp.pompclass.data,'~/../samples/London_BiData.csv','time');
+pomp.pompclass.readData(pomp.pompclass.covar,'~/../samples/London_covar.csv','time');
 
 pomp.pompclass.initializer = (states,params,covar) => {
     res = {};

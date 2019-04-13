@@ -1,38 +1,122 @@
-sleep_for_a_minute <- function() { Sys.sleep(60) }
+cureentfolder <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
 
 start_time <- Sys.time()
-library(pomp)
-
-
 ######################################################  Model Snippet
 rproc <- Csnippet("
                   double seas, beta, foi;
                   double births, va, tt;
                   double rate[6], trans[6];
-                  
 
+
+
+                  //Vacination uptake
+                  if (t < 1968)
                   va = 0;
-                  
-                  
+                  else if (t>=1968 && t<=1969)
+                  va = 0.33;
+                  else if (t>=1969 && t<=1970)
+                  va = 0.46;
+                  else if (t>=1970 && t<=1971)
+                  va = 0.51;
+                  else if (t>=1971 && t<=1972)
+                  va = 0.53;
+                  else if (t>=1972 && t<=1973)
+                  va = 0.52;
+                  else if (t>=1973 && t<=1974)
+                  va = 0.46;
+                  else if (t>=1974 && t<=1975)
+                  va = 0.46;
+                  else if (t>=1975 && t<=1976)
+                  va = 0.48;
+                  else if (t>=1976 && t<=1977)
+                  va = 0.48;
+                  else if (t>=1977 && t<=1978)
+                  va = 0.51;
+                  else if (t>=1978 && t<=1979)
+                  va = 0.53;
+                  else if (t>=1979 && t<=1980)
+                  va = 0.55;
+                  else if (t>=1980 && t<=1981)
+                  va = 0.58;
+                  else if (t>=1981 && t<=1982)
+                  va = 0.60;
+                  else if (t>=1982 && t<=1983)
+                  va = 0.63;
+                  else if (t>=1983 && t<=1984)
+                  va = 0.68;
+                  else if (t>=1984 && t<=1985)
+                  va = 0.71;
+                  else if (t>=1985 && t<=1988)
+                  va = 0.76;
+                  else if (t>=1988 && t<=1989)
+                  va = 0.814;
+                  else if (t>=1989 && t<=1990)
+                  va = 0.9488;
+                  else if (t>=1990 && t<=1991)
+                  va = 0.9818;
+                  else if (t>=1991 && t<=1992)
+                  va = 0.90;
+                  else if (t>=1992 && t<=1993)
+                  va = 0.92;
+                  else if (t>=1993 && t<=1994)
+                  va = 0.91;
+                  else if (t>=1994 && t<=1995)
+                  va = 0.91;
+                  else if (t>=1995 && t<=1996)
+                  va = 0.92;
+                  else if (t>=1996 && t<=1997)
+                  va = 0.92;
+                  else if (t>=1997 && t<=1998)
+                  va = 0.91;
+                  else if (t>=1998 && t<=1999)
+                  va = 0.88;
+                  else if (t>=1999 && t<=2000)
+                  va = 0.88;
+                  else if (t>=2000 && t<=2001)
+                  va = 0.87;
+                  else if (t>=2001 && t<=2002)
+                  va = 0.84;
+                  else if (t>=2002 && t<=2003)
+                  va = 0.82;
+                  else if (t>=2003 && t<=2004)
+                  va = 0.80;
+                  else if (t>=2004 && t<=2005)
+                  va = 0.81;
+                  else if (t>=2005 && t<=2006)
+                  va = 0.84;
+                  else if (t>=2006 && t<=2007)
+                  va = 0.85;
+                  else if (t>=2007 && t<=2008)
+                  va = 0.85;
+                  else if (t>=2008 && t<=2009)
+                  va = 0.85;
+                  else if (t>=2009 && t<=2010)
+                  va = 0.88;
+                  else
+                  va = 0.89;
+
+
                   // term-time seasonality
                   tt = (t-floor(t))*365.25;
                   if ((tt>=7&&tt<=100) || (tt>=115&&tt<=199) || (tt>=252&&tt<=300) || (tt>=308&&tt<=356))
                   seas = 1.0+amplitude*0.2411/0.7589;
                   else
                   seas = 1.0-amplitude;
-                  
+
                   // transmission rate
                   beta = R0*(gamma+mu)*(sigma+mu)*seas/sigma;  //seasonal transmission rate
                   // expected force of infection
                   foi = beta*I/pop;
-                  
+
                   rate[0] = foi;  //         force of infection
                   rate[1] = mu;             // natural S death
                   rate[2] = sigma;        // rate of ending of latent stage
                   rate[3] = mu;             // natural E death
                   rate[4] = gamma;        // recovery
                   rate[5] = mu;             // natural I death
-                  
+
+                  //if( t>= 1964.9)
+                  //printf(\"%f birthrate %f pop %f\\n\", t, birthrate, pop);
                   // Poisson births
                   births = rpois(birthrate*(1-va)*dt);
                   // transitions between classes
@@ -74,7 +158,7 @@ dmeas <- Csnippet("
                   }
                   ")
 rmeas <- Csnippet("
-                  
+
                   double m = rho*H;
                   double v = m*(1.0-rho+psi*psi*m);
                   double tol = 1.0e-18;
@@ -119,8 +203,9 @@ statenames <- c("S","E","I","R","H")
 
 zeronames <- c("H")
 #########################################            data
-London_BiData <- read.csv(file.path("~/Git/pfilter/R", "London_BiData.csv"))
-London_covar <- read.csv(file.path("~/Git/pfilter/R", "London_covar.csv"))
+cureentfolder <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
+London_BiData <- read.csv(file.path(cureentfolder, "London_BiData.csv"))
+London_covar <- read.csv(file.path(cureentfolder, "London_covar.csv"))
 #########################################       make pomp
 pomp(
   data = London_BiData,
@@ -141,10 +226,19 @@ pomp(
 
 
 current_params= c(R0=3.132490e+01 , amplitude=3.883620e-01 , gamma=7.305000e+01 , mu=6.469830e-04 , sigma=4.566000e+01 ,rho= 4.598709e-01 ,psi= 1.462546e-01 ,S_0= 3.399189e-02 ,E_0=2.336327e-04 ,R_0=9.657741e-01,I_0=4.221789e-07)
-pfilter(m1,params=current_params,Np=100,pred.mean = TRUE ) -> ss
+# pfilter(m1,params=current_params,Np=500) -> ss
 # ss ye clasee ke toosh matrix hate mokhtalef dare. Mitooni spred.mean ro baraye moghayese estefade koni ke ye matrix 5* (toole baze zaman)
 # hast. satre aval "S" ro mitooni ba in dastoor bebini.
 
-end_time <- Sys.time()
+setwd(cureentfolder)
+tstart = 1
+tend = 548
+datasetj <- as.data.frame(read.csv('predmean.csv'))
+pfilter(m1,params=current_params,Np=10,filter.mean = T,pred.mean=T, max.fail=3000) -> ss
+datapredict <- as.data.frame(ss@pred.mean)
+pm=c();for(i in tstart:tend){pm[i]=datapredict[1,i]}
+plot(datasetj$S[c(tstart:tend)], type ="l",main="Np",col = "red", ylab = "JS")
+points(pm[c(tstart:tend)], type ="l")
 
+end_time <- Sys.time()
 end_time - start_time

@@ -16,14 +16,14 @@ let toler = 1e-17
 
 
 //* 1st data set
-let London_covar = fs.readFileSync('../../samples/London_covar.csv').toString()
+let London_covar = fs.readFileSync('~/../samples/London_covar.csv').toString()
 var lines = London_covar.split('\n')
 for (let i = 1; i < lines.length - 1; i++) {
   dataCovar.push(lines[i].split(','))
 }
 
 //* 2nd data set
-let London_BiData = fs.readFileSync('../../samples/London_BiData.csv').toString()
+let London_BiData = fs.readFileSync('~/../samples/London_BiData.csv').toString()
 var lines = London_BiData.split('\n')
 for (let i = 1; i < lines.length - 1; i++) {
   dataCases.push(lines[i].split(','))
@@ -213,7 +213,7 @@ console.log(loglik)
 const createCsvWriter = require('csv-writer').createArrayCsvWriter;
 const csvWriter = createCsvWriter({
   header: ['S', 'E', 'I', 'R', 'H'],
-  path: '../../samples/predmean.csv'
+  path: '~/../samples/predmean.csv'
 })
  
 csvWriter.writeRecords(predictionMean)
