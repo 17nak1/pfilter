@@ -1,0 +1,11 @@
+{
+  "requires": true,
+  "lockfileVersion": 1,
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "lib-r-math.js": "^1.0.86"
+  },
+  "devDependencies": {
+    "browserify": "^16.2.3"
+  }
+}
