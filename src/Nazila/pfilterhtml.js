@@ -62,7 +62,7 @@ var linearInterpolator = require('linear-interpolator/node_main')
 // var interpolBirth = linearInterpolator(d2)
 // var dt = 1 / 365.25
 //////////////////////////////////////////////////////////////////////////////////////* main function//////////////////////////////////////////////////////////////////////
-function pfilterhtml (input) {//filter.traj , save.params
+function pfilterCalculation (input) {//filter.traj , save.params
   // {params:inputArr, Np:100,times:times, dt:1 / 365.25,runPredMean:1,  dataCases:dataCases, interpolPop:interpolPopulation, interpolBirth:interpolBirth}
   let START =new Date()
   let defaults = {params:-1, Np:-1, tol:1e-17, maxFail:Infinity, runPredMean:0, runPredVar:0, runFilterMean:0, runSaveStates:0, times:-1, dt:-1,
@@ -89,7 +89,7 @@ function pfilterhtml (input) {//filter.traj , save.params
 let [t0, tdata] = [1940, 1944]
 let nvars = 5
 let deltaT = 14 / 365.25
-let dt = 1 / 365.25
+dt = 1 / 365.25
 let doPredictionVariance = 0, doPredictionMean = 1, doFilterMean = 0 , allFail = 0
 
 let timeLen = dataCases.length 
@@ -271,7 +271,7 @@ state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
 }
 
 module.exports = {
-  pfilterhtml
+  pfilterCalculation
 }
 
 
