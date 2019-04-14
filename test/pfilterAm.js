@@ -1,11 +1,9 @@
 
-
 fs = require('fs')
 let fmin = require ('fmin')
 let mathLib = require('./mathLib')
 let snippet = require('./modelSnippet.js')
 
-function pfilterCalculation(){
 
 //////////////////////////////////////////data///////////////////////////////////////
 var dataCases = [], dataCovar = []
@@ -227,8 +225,3 @@ csvWriter.writeRecords(predictionMean)
 
   
 console.log('running time:',new Date() - START,'ms')
-}
-
-module.exports = {
-  pfilterCalculation
-}

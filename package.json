@@ -3,7 +3,7 @@
   "lockfileVersion": 1,
   "scripts": {
     "bundlejs": "browserify -r ./src/Nazila/pfilterhtml.js:pfilter > ./dist/bundle.js",
-    "bundlejs2": "browserify -r ./src/Nazila/pfilterAm.js:pfilter > ./dist/bundle2.js"
+    "bundlejs2": "browserify -r ./src/Nazila2/pfilterhtml.js:pfilter > ./dist/bundle2.js"
   },
   "dependencies": {
     "csv-writer": "^1.2.0",
