@@ -3,9 +3,9 @@ let mathLib = require('./mathLib.js')
 let snippet = require('./modelSnippet.js')
 
 simulator = {}
-simulator.simulate = function (p, k, tdata, deltaT, dt, timeCountData, interpolPop, interpolBirth,params, t1,t2 ) {
+simulator.simulate = function (particles, k, tdata, deltaT, dt, timeCountData, interpolPop, interpolBirth,params, t1,t2 ) {
   var st, S, E, I, R, H 
-  S = p[0]; E = p[1]; I = p[2]; R = p[3]; H = p[4]
+  S = particles[0]; E = particles[1]; I = particles[2]; R = particles[3]; H = particles[4]
   // transitions between classes
   if (k <= tdata || k > t1) {
     steps = mathLib.numMapSteps(k, k + deltaT, dt)
