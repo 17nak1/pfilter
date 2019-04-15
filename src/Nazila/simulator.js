@@ -16,7 +16,7 @@ simulator.simulate = function (particles, k, tdata, deltaT, dt, timeCountData, i
   for (let stp = 0; stp < steps; stp++) { // steps in each time interval
     st = k + stp * del_t
     simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], interpolPop(st), interpolBirth(st))
-    S = simulateValue[0]; E = simulateValue[1], I = simulateValue[2], R = simulateValue[3], H = simulateValue[4]
+    S = simulateValue[0]; E = simulateValue[1]; I = simulateValue[2]; R = simulateValue[3]; H = simulateValue[4]
   }
   return [S, E, I, R, H]
 }

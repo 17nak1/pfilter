@@ -11,7 +11,7 @@ const libR = require('lib-r-math.js')
 // const mt = new MersenneTwister(0)// 
 // const { rpois } = Poisson(new Inversion(mt))
 // mt.init(1234)
-snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
+snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, births) {
   var seas, births, beta, beta0, foi, R0, tt, va
   var trans = new Array(6).fill(0)
   var rate = new Array(6) 
@@ -37,7 +37,7 @@ snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   rate[4] = gamma// recovery
   rate[5] = mu// natural I death 
    
-  births = mathLib.rpois(birthrate * (1 - va) * del_t )// Poisson births
+  // births = mathLib.rpois(birthrate * (1 - va) * del_t )// Poisson births
   mathLib.reulermultinom(2, Math.round(S), 0, del_t, 0, rate, trans)
   mathLib.reulermultinom(2, Math.round(E), 2, del_t, 2, rate, trans)
   mathLib.reulermultinom(2, Math.round(I), 4, del_t, 4, rate, trans)
