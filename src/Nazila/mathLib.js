@@ -124,7 +124,6 @@ mathLib.rpois = function (lambda = 1) {
     k += 1
     p = p * Math.random()
   }
-  return k-1
 }
 
 mathLib.interpolator = function (points) {
