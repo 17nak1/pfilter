@@ -10,7 +10,7 @@ let simulator = require ('./simulator.js')
 let dataCases = [], dataCovar = []
 let params = [3.132490e+01, 3.883620e-01, 7.305000e+01, 6.469830e-04, 4.566000e+01, 4.598709e-01, 1.462546e-01, 3.399189e-02, 2.336327e-04, 4.221789e-07, 9.657741e-01 ]
 let maxFail = Infinity
-let Np = 100
+let Np = 10
 console.log("Np",Np)
 let toler = 1e-17
 
@@ -57,7 +57,7 @@ var particles = new Array(Np).fill(null).map(() => Array(5)),
 let sampleNum = Array.from(Array(Np).keys())
 let condLoglik = []
 let stateSaved =[]
-let temp = new Array(Np).fill(null).map(() => Array(5))
+let temp 
 let timeCountData = 0, ws ,w , vsq, sumsq, ess, loglik = 0, lik 
 
 let predictionMean, predictionVariance, filterMean
@@ -78,7 +78,7 @@ if (doFilterMean) {
 state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
 // First Np sets
 var particles = new Array(Np).fill(null).map(() => [].concat(state))
-
+temp = new Array(Np).fill(null).map(() => [].concat(state))
 // Time loop
 for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){//Number(dataCases[timeLen - 2][0]) + deltaT / 3
   if ( k > tdata - deltaT && k <= tdata) {
@@ -93,6 +93,7 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
     }
   } 
   
+
   //**PARTICLE LOOP
   // for (np = 0; np < Np; np++){ //calc for each particle
   //   trans = []
@@ -102,8 +103,8 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
     // } else {
     //     steps = mathLib.numEulerSteps(k, Number(dataCases[timeCountData + 1][0]), dt)
     // }
-      del_t = (1 / steps )* deltaT;console.log(del_t)
- 
+      del_t = (1 / steps )* deltaT
+
   for (let stp = 0; stp < steps; stp++) { // steps in each time interval
     
     st = k + stp * del_t
@@ -114,7 +115,6 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
           trans = []
           S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
           
-            
           simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], pop, births)
 
           temp[np][0] = simulateValue[0]; temp[np][1] = simulateValue[1]; temp[np][2] = simulateValue[2]; temp[np][3] = simulateValue[3]; temp[np][4] = simulateValue[4]
@@ -127,20 +127,20 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
         particles[np][2] = temp[np][2]
         particles[np][3] = temp[np][3]
         particles[np][4] = temp[np][4]
-      }
-  
-    // console.log(k)
+        H = temp[np][4]
+
      
     //***********weight*************
     if (k >= Number(dataCases[0][0])){
-      // if (stateSaved) {
-      //   stateSaved.push(particles[np]) //[S,E,I,R,H])
-      // }
-      modelCases = Number(dataCases[timeCountData][1])
+      if (stateSaved) {
+        stateSaved.push(particles[np]) //[S,E,I,R,H])
+      }
+      modelCases = Number(dataCases[timeCountData][1]);console.log(H, modelCases)
       likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
       weights.push(likvalue)
       
     }
+  }
   }//  end particle loop
   
   //normalize
@@ -184,68 +184,68 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
     loglik += lik
     mathLib.nosortResamp(Np, normalWeights, Np, sampleNum, 0)
     
-    // Compute outputs
-    for (let j = 0; j< nvars; j++) {
-      // compute prediction mean
-      if (doPredictionMean || doPredictionVariance) {
-        let sum = 0, nlost = 0
-        for (let nrow =0; nrow < Np; nrow++){
-          if (particles[nrow][j]) {
-            sum += particles[nrow][j]
-          } else {
-            nlost++
-          }
-        }
-        sum /= Np
-        predictionMean[timeCountData][j] = sum
-      }  
-      // compute prediction variance
-      if (doPredictionVariance) {
-        sumsq = 0
-        for (let nrow = 0; nrow < Np; nrow++){
-          if (particles[nrow][j]) {
-            vsq = particles[nrow][j] - sum
-            sumsq += Math.pow(vsq, 2)
-          }
-        }
-        predictionVariance[timeCountData][j] = sumsq / (Np - 1) 
-      }
-      //  compute filter mean
-      if (doFilterMean) {
-        if (allFail) {   // unweighted average
-          ws = 0
-          for (let nrow =0; nrow < Np; nrow++){
-            if (particles[nrow][j]) {
-              ws += particles[nrow][j]
-            }
-          } 
-          filterMean[timeCountData][j] = ws / Np//;console.log(ws / Np)
-        } else {      // weighted average
-          ws = 0
-          for (let nrow =0; nrow < Np; nrow++){
-            if (particles[nrow][j]) {
-              ws += particles[nrow][j] * weights[nrow]
-            }
-          }
-          filterMean[timeCountData][j] = ws / w
-        }
-      }
-    }
+    // // Compute outputs
+    // for (let j = 0; j< nvars; j++) {
+    //   // compute prediction mean
+    //   if (doPredictionMean || doPredictionVariance) {
+    //     let sum = 0, nlost = 0
+    //     for (let nrow =0; nrow < Np; nrow++){
+    //       if (particles[nrow][j]) {
+    //         sum += particles[nrow][j]
+    //       } else {
+    //         nlost++
+    //       }
+    //     }
+    //     sum /= Np
+    //     predictionMean[timeCountData][j] = sum
+    //   }  
+    //   // compute prediction variance
+    //   if (doPredictionVariance) {
+    //     sumsq = 0
+    //     for (let nrow = 0; nrow < Np; nrow++){
+    //       if (particles[nrow][j]) {
+    //         vsq = particles[nrow][j] - sum
+    //         sumsq += Math.pow(vsq, 2)
+    //       }
+    //     }
+    //     predictionVariance[timeCountData][j] = sumsq / (Np - 1) 
+    //   }
+    //   //  compute filter mean
+    //   if (doFilterMean) {
+    //     if (allFail) {   // unweighted average
+    //       ws = 0
+    //       for (let nrow =0; nrow < Np; nrow++){
+    //         if (particles[nrow][j]) {
+    //           ws += particles[nrow][j]
+    //         }
+    //       } 
+    //       filterMean[timeCountData][j] = ws / Np//;console.log(ws / Np)
+    //     } else {      // weighted average
+    //       ws = 0
+    //       for (let nrow =0; nrow < Np; nrow++){
+    //         if (particles[nrow][j]) {
+    //           ws += particles[nrow][j] * weights[nrow]
+    //         }
+    //       }
+    //       filterMean[timeCountData][j] = ws / w
+    //     }
+    //   }
+    // }
     timeCountData++ 
   
 }//endTime
 
 console.log(loglik)
-const createCsvWriter = require('csv-writer').createArrayCsvWriter;
-const csvWriter = createCsvWriter({
-  header: ['S', 'E', 'I', 'R', 'H'],
-  path: '../../samples/predmean.csv'
-})
+// const createCsvWriter = require('csv-writer').createArrayCsvWriter;
+// const csvWriter = createCsvWriter({
+//   header: ['S', 'E', 'I', 'R', 'H'],
+//   path: '../../samples/predmean.csv'
+// })
  
-csvWriter.writeRecords(predictionMean)
-  .then(() => {
-  console.log('...predictionMean')
-})
+// csvWriter.writeRecords(predictionMean)
+//   .then(() => {
+//   console.log('...predictionMean')
+// })
 
 
 
