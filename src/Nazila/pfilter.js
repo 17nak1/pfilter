@@ -10,7 +10,7 @@ let simulator = require ('./simulator.js')
 let dataCases = [], dataCovar = []
 let params = [3.132490e+01, 3.883620e-01, 7.305000e+01, 6.469830e-04, 4.566000e+01, 4.598709e-01, 1.462546e-01, 3.399189e-02, 2.336327e-04, 4.221789e-07, 9.657741e-01 ]
 let maxFail = Infinity
-let Np = 10
+let Np = 100
 console.log("Np",Np)
 let toler = 1e-17
 
@@ -52,17 +52,19 @@ let timeLen = dataCases.length
 let nlost = 0
 
 let rate = [], trans = []
-let particles = [], state =[]
+var particles = new Array(Np).fill(null).map(() => Array(5)),
+ state =[]
 let sampleNum = Array.from(Array(Np).keys())
 let condLoglik = []
 let stateSaved =[]
-
+let temp = new Array(Np).fill(null).map(() => Array(5))
 let timeCountData = 0, ws ,w , vsq, sumsq, ess, loglik = 0, lik 
 
 let predictionMean, predictionVariance, filterMean
 let states = Array(Np).fill(null).map(() => Array(nvars))
 let weights, normalWeights, S, E, I, R, del_t, ST, simulateValue
 let modelCases, likvalue
+var st, births, pop,birthrate
 if (doPredictionMean) {
   predictionMean = Array(timeLen).fill(null).map(() => Array(nvars))
 }
@@ -75,7 +77,7 @@ if (doFilterMean) {
 
 state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
 // First Np sets
-var aa = new Array(Np).fill(null).map(() => [].concat(state))
+var particles = new Array(Np).fill(null).map(() => [].concat(state))
 
 // Time loop
 for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){//Number(dataCases[timeLen - 2][0]) + deltaT / 3
@@ -86,30 +88,54 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
   
   if ( k > t0) {
     for (np = 0; np < Np; np++) { // copy the particles
-      aa[np] = [].concat(particles[sampleNum[np]])
-      aa[np][nvars - 1] = 0
+      temp[np] = [].concat(particles[sampleNum[np]])
+      temp[np][nvars - 1] = 0
     }
   } 
   
   //**PARTICLE LOOP
-  for (np = 0; np < Np; np++){ //calc for each particle
-    trans = []
-
-    particles[np] = simulator.simulate(aa[np], k, tdata, deltaT, dt, timeCountData, interpolPop, interpolBirth,params, Number(dataCases[dataCases.length - 1]), Number(dataCases[timeCountData + 1][0]))
+  // for (np = 0; np < Np; np++){ //calc for each particle
+  //   trans = []
+  //   S = aa[np][0]; E = aa[np][1]; I = aa[np][2]; R = aa[np][3]; H = aa[np][4]
+    // if (k <= tdata || k > Number(dataCases[dataCases.length - 1]) {
+        steps = mathLib.numMapSteps(k, k + deltaT, dt)
+    // } else {
+    //     steps = mathLib.numEulerSteps(k, Number(dataCases[timeCountData + 1][0]), dt)
+    // }
+      del_t = (1 / steps )* deltaT;console.log(del_t)
+ 
+  for (let stp = 0; stp < steps; stp++) { // steps in each time interval
     
-    S = particles[np][0] 
-    E = particles[np][1]
-    I = particles[np][2] 
-    R = particles[np][3] 
-    H = particles[np][4] 
+    st = k + stp * del_t
+    pop = interpolPop(st)
+    birthrate = interpolBirth(st)
+    births = mathLib.rpois(birthrate *  del_t )
+        for (np = 0; np < Np; np++){ //calc for each particle
+          trans = []
+          S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
+          
+            
+          simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], pop, births)
 
+          temp[np][0] = simulateValue[0]; temp[np][1] = simulateValue[1]; temp[np][2] = simulateValue[2]; temp[np][3] = simulateValue[3]; temp[np][4] = simulateValue[4]
+        }
+      
+      }
+      for (np = 0; np < Np; np++){ 
+        particles[np][0] = temp[np][0]
+        particles[np][1] = temp[np][1]
+        particles[np][2] = temp[np][2]
+        particles[np][3] = temp[np][3]
+        particles[np][4] = temp[np][4]
+      }
+  
     // console.log(k)
      
     //***********weight*************
     if (k >= Number(dataCases[0][0])){
-      if (stateSaved) {
-        stateSaved.push(particles[np]) //[S,E,I,R,H])
-      }
+      // if (stateSaved) {
+      //   stateSaved.push(particles[np]) //[S,E,I,R,H])
+      // }
       modelCases = Number(dataCases[timeCountData][1])
       likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
       weights.push(likvalue)
@@ -206,7 +232,7 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
       }
     }
     timeCountData++ 
-  }
+  
 }//endTime
 
 console.log(loglik)
