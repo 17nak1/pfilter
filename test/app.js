@@ -7,8 +7,16 @@ rng: { MersenneTwister },
 rng: { normal: { Inversion } }
 } = libR
 const mt = new MersenneTwister(0)//
-const { rpois } = Poisson(new Inversion(mt))
-mt.init(1234)
+
+let START =new Date()
+rpois = function (lambda = 1) {
+    var k = 0; p = 1; l= Math.exp(-lambda)
+    while (p > l) { 
+      k += 1
+      p = p * Math.random()
+    }
+    return k-1
+  }
 
 pomp.pompclass.t0=1940;
 pomp.pompclass.dt=1/365.25;
@@ -162,4 +170,4 @@ pomp.pompclass.rprocess = (t,dt,states,params,covar) => {
 
 pomp.pfilter(10);
 
-console.log('Finished');
+console.log('Finished',new Date() - START,'ms');
