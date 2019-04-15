@@ -26,45 +26,9 @@ let snippet = require('./modelSnippet.js')
 let simulator = require('./simulator.js')
 var linearInterpolator = require('linear-interpolator/node_main')
 
-//////////////////////////////////////////data///////////////////////////////////////
-// var LondonBidata = [], LondonCovar = []
-// var rate = new Array(6) 
-// // var params = [3.165652e+01 , 3.887624e-01 , 7.305000e+01 , 1.698730e-02  ,4.566000e+01,  4.813669e-01  ,1.963092e-01 , 2.831066e-03 ,3.476483e-04 ,  2.109135e-08,9.968213e-01]
-// var params = [3.132490e+01 , 3.883620e-01 , 7.305000e+01 , 6.469830e-04 , 4.566000e+01 , 4.598709e-01 , 1.462546e-01 , 3.399189e-02 ,2.336327e-04 ,4.221789e-07 ,9.657741e-01 ]
-// var times =[1940, 1944], maxFail = Infinity
-// var Np = 100
-// var nvars 
-// var toler = 1e-17
-
-// const anonymous = function(){ return -1 }
-
-// //* 1st data set
-// var London_covar = fs.readFileSync('./London_covar.csv').toString()
-// var lines = London_covar.split('\n')
-// for (let i = 1; i < lines.length; i++) {
-//   LondonCovar.push(lines[i].split(','))
-// }
-// var dataCovar = [LondonCovar][0]
-// //* 2nd data set
-// var London_BiData = fs.readFileSync('./London_BiData1.csv').toString()
-// var lines = London_BiData.split('\n')
-// for (let i = 1; i < lines.length; i++) {
-//   LondonBidata.push(lines[i].split(','))
-// }
-// var dataCases = [LondonBidata][0]
-
-// var d1 = []// read time and population from 1st data and make interpolation function
-// var d2 = []// read time and birthrate from 1st data and make interpolation function
-// for (let i = 0; i < dataCovar.length - 1; i++) {
-//   d1.push([Number(dataCovar[i][0]), Number(dataCovar[i][1])])
-//   d2.push([Number(dataCovar[i][0]), Number(dataCovar[i][2])])
-// }
-// var interpolPop = linearInterpolator(d1)
-// var interpolBirth = linearInterpolator(d2)
-// var dt = 1 / 365.25
-//////////////////////////////////////////////////////////////////////////////////////* main function//////////////////////////////////////////////////////////////////////
+// main function
 function pfilterCalculation (input) {//filter.traj , save.params
-  // {params:inputArr, Np:100,times:times, dt:1 / 365.25,runPredMean:1,  dataCases:dataCases, interpolPop:interpolPopulation, interpolBirth:interpolBirth}
+  
   let START =new Date()
   let defaults = {params:-1, Np:-1, tol:1e-17, maxFail:Infinity, runPredMean:0, runPredVar:0, runFilterMean:0, runSaveStates:0, times:-1, dt:-1,
                    dataCases:0}
@@ -87,46 +51,47 @@ function pfilterCalculation (input) {//filter.traj , save.params
   var interpolBirth = input.interpolBirth
   
   let [R0, amplitude, gamma, mu, sigma, rho, psi, S_0, E_0, I_0, R_0] = params
-let [t0, tdata] = [1940, 1944]
-let nvars = 5
-let deltaT = 14 / 365.25
-dt = 1 / 365.25
-let doPredictionVariance = 0, doPredictionMean = 1, doFilterMean = 0 , allFail = 0
-
-let timeLen = dataCases.length 
-let nlost = 0
-
-let rate = [], trans = []
-let particles = [], state =[]
-let sampleNum = Array.from(Array(Np).keys())
-let condLoglik = []
-let stateSaved =[]
-
-let timeCountData = 0, ws ,w , vsq, sumsq, ess, loglik = 0, lik 
-
-let predictionMean, predictionVariance, filterMean
-let states = Array(Np).fill(null).map(() => Array(nvars))
-let weights, normalWeights, S, E, I, R, del_t, ST, simulateValue
-let modelCases, likvalue
-if (doPredictionMean) {
-  predictionMean = Array(timeLen).fill(null).map(() => Array(nvars))
-}
-if (doPredictionVariance) {
-  predictionVariance = Array(timeLen).fill(null).map(() => Array(nvars))
-}
-if (doFilterMean) {
-  filterMean = Array(timeLen).fill(null).map(() => Array(nvars))
-}
-
-state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
-  // time loop
-  for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){//Number(dataCases[timeLen - 2][0]) + deltaT / 3
+  let [t0, tdata] = [1940, 1944]
+  let nvars = 5
+  let deltaT = 14 / 365.25
+  let doPredictionVariance = 0, doPredictionMean = 1, doFilterMean = 0 , allFail = 0
+  
+  let timeLen = dataCases.length 
+  let nlost = 0
+  
+  let rate = [], trans = []
+  let particles = [], state =[]
+  let sampleNum = Array.from(Array(Np).keys())
+  let condLoglik = []
+  let stateSaved =[]
+  
+  let timeCountData = 0, ws ,w , vsq, sumsq, ess, loglik = 0, lik 
+  
+  let predictionMean, predictionVariance, filterMean
+  let states = Array(Np).fill(null).map(() => Array(nvars))
+  let weights, normalWeights, S, E, I, R, del_t, ST, simulateValue
+  let modelCases, likvalue
+  if (doPredictionMean) {
+    predictionMean = Array(timeLen).fill(null).map(() => Array(nvars))
+  }
+  if (doPredictionVariance) {
+    predictionVariance = Array(timeLen).fill(null).map(() => Array(nvars))
+  }
+  if (doFilterMean) {
+    filterMean = Array(timeLen).fill(null).map(() => Array(nvars))
+  }
+  
+  state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
+  // First Np sets
+  var aa = new Array(Np).fill(null).map(() => [].concat(state))
+  // Time loop
+for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){//Number(dataCases[timeLen - 2][0]) + deltaT / 3
   if ( k > tdata - deltaT && k <= tdata) {
     k = tdata
   }
   weights = []; normalWeights = []
-  aa = [Np];
-  if ( k >= t0) {
+  
+  if ( k > t0) {
     for (np = 0; np < Np; np++) { // copy the particles
       aa[np] = [].concat(particles[sampleNum[np]])
       aa[np][nvars - 1] = 0
@@ -200,8 +165,8 @@ state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
     loglik += lik
     mathLib.nosortResamp(Np, normalWeights, Np, sampleNum, 0)
     
-      // Compute outputs
-      for (let j = 0; j< nvars; j++) {
+    // Compute outputs
+    for (let j = 0; j< nvars; j++) {
       // compute prediction mean
       if (doPredictionMean || doPredictionVariance) {
         let sum = 0, nlost = 0
@@ -249,7 +214,7 @@ state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
     }
     timeCountData++ 
   }
-  }//endTime
+}//endTime
   console.log('loglike=',loglik)
   console.log('runing time=', new Date() - START)
   activateDownload ()
