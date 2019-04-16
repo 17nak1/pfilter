@@ -102,7 +102,7 @@ function start () {
       // var tem = inputArr[9]
       // inputArr[9] = inputArr[10]
       // inputArr[10] = tem
-      res.push(pfilterCalculation({params:inputArr, Np:10,times:times, dt:1 / 365.25,runPredMean:1,  dataCases:dataCases, interpolPop:interpolPopulation, interpolBirth:interpolBirth}))
+      res.push(pfilterCalculation({params:inputArr, Np:100,times:times, dt:1 / 365.25,runPredMean:1,  dataCases:dataCases, interpolPop:interpolPopulation, interpolBirth:interpolBirth}))
         
       console.log(res)
       res.splice(0, 0, ['S', 'E', 'I', 'R', 'H'])

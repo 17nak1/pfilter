@@ -1,6 +1,7 @@
 cureentfolder <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
-
 start_time <- Sys.time()
+
+
 ######################################################  Model Snippet
 rproc <- Csnippet("
                   double seas, beta, foi;
@@ -149,7 +150,7 @@ setwd(cureentfolder)
 tstart = 1
 tend = 548
 datasetj <- as.data.frame(read.csv('predmean.csv'))
-pfilter(m1,params=current_params,Np=10,filter.mean = T,pred.mean=T, max.fail=3000) -> ss
+pfilter(m1,params=current_params,Np=100,filter.mean = T,pred.mean=T, max.fail=3000) -> ss
 datapredict <- as.data.frame(ss@pred.mean)
 pm=c();for(i in tstart:tend){pm[i]=datapredict[1,i]}
 plot(datasetj$S[c(tstart:tend)], type ="l",main="Np",col = "red", ylab = "JS")
