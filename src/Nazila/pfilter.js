@@ -56,7 +56,7 @@ var particles = new Array(Np).fill(null).map(() => Array(5)),
  state =[]
 let sampleNum = Array.from(Array(Np).keys())
 let condLoglik = []
-let stateSaved =[]
+let stateSaved = []
 let temp 
 let timeCountData = 0, ws ,w , vsq, sumsq, ess, loglik = 0, lik 
 
@@ -77,7 +77,7 @@ if (doFilterMean) {
 
 state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
 // First Np sets
-var particles = new Array(Np).fill(null).map(() => [].concat(state))
+var particles = new Array(Np).fill(null).map(() => [].concat(state));
 temp = new Array(Np).fill(null).map(() => [].concat(state))
 // Time loop
 for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){//Number(dataCases[timeLen - 2][0]) + deltaT / 3
@@ -89,21 +89,17 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
   if ( k > t0) {
     for (np = 0; np < Np; np++) { // copy the particles
       temp[np] = [].concat(particles[sampleNum[np]])
+
       temp[np][nvars - 1] = 0
     }
   } 
   
-
-  //**PARTICLE LOOP
-  // for (np = 0; np < Np; np++){ //calc for each particle
-  //   trans = []
-  //   S = aa[np][0]; E = aa[np][1]; I = aa[np][2]; R = aa[np][3]; H = aa[np][4]
-    // if (k <= tdata || k > Number(dataCases[dataCases.length - 1]) {
-        steps = mathLib.numMapSteps(k, k + deltaT, dt)
-    // } else {
-    //     steps = mathLib.numEulerSteps(k, Number(dataCases[timeCountData + 1][0]), dt)
-    // }
-      del_t = (1 / steps )* deltaT
+  // if (k <= tdata || k > Number(dataCases[dataCases.length - 1])) {
+      steps = mathLib.numMapSteps(k, k + deltaT, dt)
+  // } else {
+  //     steps = mathLib.numEulerSteps(k, Number(dataCases[timeCountData + 1][0]), dt)
+  // }
+    del_t = (1 / steps )* deltaT
 
   for (let stp = 0; stp < steps; stp++) { // steps in each time interval
     
@@ -111,37 +107,31 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
     pop = interpolPop(st)
     birthrate = interpolBirth(st)
     births = mathLib.rpois(birthrate *  del_t )
-        for (np = 0; np < Np; np++){ //calc for each particle
-          trans = []
-          S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
-          
-          simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], pop, births)
-
-          temp[np][0] = simulateValue[0]; temp[np][1] = simulateValue[1]; temp[np][2] = simulateValue[2]; temp[np][3] = simulateValue[3]; temp[np][4] = simulateValue[4]
-        }
-      
+      for (np = 0; np < Np; np++){ //calc for each particle
+        trans = []
+        S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
+        simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], pop, births)
+        temp[np][0] = simulateValue[0]; temp[np][1] = simulateValue[1]; temp[np][2] = simulateValue[2]; temp[np][3] = simulateValue[3]; temp[np][4] = simulateValue[4]
       }
-      for (np = 0; np < Np; np++){ 
-        particles[np][0] = temp[np][0]
-        particles[np][1] = temp[np][1]
-        particles[np][2] = temp[np][2]
-        particles[np][3] = temp[np][3]
-        particles[np][4] = temp[np][4]
-        H = temp[np][4]
-
-     
-    //***********weight*************
-    if (k >= Number(dataCases[0][0])){
-      if (stateSaved) {
-        stateSaved.push(particles[np]) //[S,E,I,R,H])
-      }
-      modelCases = Number(dataCases[timeCountData][1]);console.log(H, modelCases)
-      likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
-      weights.push(likvalue)
-      
     }
-  }
-  }//  end particle loop
+    for (np = 0; np < Np; np++){ 
+      particles[np][0] = temp[np][0]
+      particles[np][1] = temp[np][1]
+      particles[np][2] = temp[np][2]
+      particles[np][3] = temp[np][3]
+      particles[np][4] = temp[np][4]
+      H = temp[np][4]
+  //***********weight*************
+      if (k >= Number(dataCases[0][0])){
+        if (stateSaved) {
+          stateSaved.push(particles[np]) //[S,E,I,R,H])
+        }
+        modelCases = Number(dataCases[timeCountData][1])
+        likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
+        weights.push(likvalue)           
+      }
+    }
+   
   
   //normalize
   if (k >= Number(dataCases[0][0])){
@@ -184,68 +174,68 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
     loglik += lik
     mathLib.nosortResamp(Np, normalWeights, Np, sampleNum, 0)
     
-    // // Compute outputs
-    // for (let j = 0; j< nvars; j++) {
-    //   // compute prediction mean
-    //   if (doPredictionMean || doPredictionVariance) {
-    //     let sum = 0, nlost = 0
-    //     for (let nrow =0; nrow < Np; nrow++){
-    //       if (particles[nrow][j]) {
-    //         sum += particles[nrow][j]
-    //       } else {
-    //         nlost++
-    //       }
-    //     }
-    //     sum /= Np
-    //     predictionMean[timeCountData][j] = sum
-    //   }  
-    //   // compute prediction variance
-    //   if (doPredictionVariance) {
-    //     sumsq = 0
-    //     for (let nrow = 0; nrow < Np; nrow++){
-    //       if (particles[nrow][j]) {
-    //         vsq = particles[nrow][j] - sum
-    //         sumsq += Math.pow(vsq, 2)
-    //       }
-    //     }
-    //     predictionVariance[timeCountData][j] = sumsq / (Np - 1) 
-    //   }
-    //   //  compute filter mean
-    //   if (doFilterMean) {
-    //     if (allFail) {   // unweighted average
-    //       ws = 0
-    //       for (let nrow =0; nrow < Np; nrow++){
-    //         if (particles[nrow][j]) {
-    //           ws += particles[nrow][j]
-    //         }
-    //       } 
-    //       filterMean[timeCountData][j] = ws / Np//;console.log(ws / Np)
-    //     } else {      // weighted average
-    //       ws = 0
-    //       for (let nrow =0; nrow < Np; nrow++){
-    //         if (particles[nrow][j]) {
-    //           ws += particles[nrow][j] * weights[nrow]
-    //         }
-    //       }
-    //       filterMean[timeCountData][j] = ws / w
-    //     }
-    //   }
-    // }
-    timeCountData++ 
-  
+    // Compute outputs
+    for (let j = 0; j< nvars; j++) {
+      // compute prediction mean
+      if (doPredictionMean || doPredictionVariance) {
+        let sum = 0, nlost = 0
+        for (let nrow =0; nrow < Np; nrow++){
+          if (particles[nrow][j]) {
+            sum += particles[nrow][j]
+          } else {
+            nlost++
+          }
+        }
+        sum /= Np
+        predictionMean[timeCountData][j] = sum
+      }  
+      // compute prediction variance
+      if (doPredictionVariance) {
+        sumsq = 0
+        for (let nrow = 0; nrow < Np; nrow++){
+          if (particles[nrow][j]) {
+            vsq = particles[nrow][j] - sum
+            sumsq += Math.pow(vsq, 2)
+          }
+        }
+        predictionVariance[timeCountData][j] = sumsq / (Np - 1) 
+      }
+      //  compute filter mean
+      if (doFilterMean) {
+        if (allFail) {   // unweighted average
+          ws = 0
+          for (let nrow =0; nrow < Np; nrow++){
+            if (particles[nrow][j]) {
+              ws += particles[nrow][j]
+            }
+          } 
+          filterMean[timeCountData][j] = ws / Np//;console.log(ws / Np)
+        } else {      // weighted average
+          ws = 0
+          for (let nrow =0; nrow < Np; nrow++){
+            if (particles[nrow][j]) {
+              ws += particles[nrow][j] * weights[nrow]
+            }
+          }
+          filterMean[timeCountData][j] = ws / w
+        }
+      }
+    }
+    }
+    timeCountData++
 }//endTime
 
 console.log(loglik)
-// const createCsvWriter = require('csv-writer').createArrayCsvWriter;
-// const csvWriter = createCsvWriter({
-//   header: ['S', 'E', 'I', 'R', 'H'],
-//   path: '../../samples/predmean.csv'
-// })
+const createCsvWriter = require('csv-writer').createArrayCsvWriter;
+const csvWriter = createCsvWriter({
+  header: ['S', 'E', 'I', 'R', 'H'],
+  path: '../../samples/predmean.csv'
+})
  
-// csvWriter.writeRecords(predictionMean)
-//   .then(() => {
-//   console.log('...predictionMean')
-// })
+csvWriter.writeRecords(predictionMean)
+  .then(() => {
+  console.log('...predictionMean')
+})
 
 
 

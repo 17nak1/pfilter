@@ -12,7 +12,7 @@ const libR = require('lib-r-math.js')
 // const { rpois } = Poisson(new Inversion(mt))
 // mt.init(1234)
 snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, births) {
-  var seas, births, beta, beta0, foi, R0, tt, va
+  var seas, beta, beta0, foi, R0, tt, va
   var trans = new Array(6).fill(0)
   var rate = new Array(6) 
   var deltaT = 14 / 365.25
