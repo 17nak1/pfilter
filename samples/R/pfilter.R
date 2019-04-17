@@ -10,7 +10,7 @@ rproc <- Csnippet("
 
 
                   va = 0;
-               
+
 
                   // term-time seasonality
                   tt = (t-floor(t))*365.25;
@@ -150,7 +150,7 @@ setwd(cureentfolder)
 tstart = 1
 tend = 548
 datasetj <- as.data.frame(read.csv('predmean.csv'))
-pfilter(m1,params=current_params,Np=100,filter.mean = T,pred.mean=T, max.fail=3000) -> ss
+pfilter(m1,params=current_params,Np=1000,filter.mean = T,pred.mean=T, max.fail=3000) -> ss
 datapredict <- as.data.frame(ss@pred.mean)
 pm=c();for(i in tstart:tend){pm[i]=datapredict[1,i]}
 plot(datasetj$S[c(tstart:tend)], type ="l",main="Np",col = "red", ylab = "JS")
