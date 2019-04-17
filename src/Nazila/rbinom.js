@@ -1,6 +1,13 @@
+/*
+ * file        rbinom.js     Random variates from the binomial distribution.
+ *                         
+ * References                Jacob K.F. Bogers  info@mail.jacob-bogers.com
+ *                           https://github.com/R-js/libRmath.js/blob/master/src/lib/binomial/rbinom.ts
+ */
 
 rbinom = {}
-rbinom. rbinomOne = function (nin, pp) {
+
+rbinom. rbinomOne = function (size, pp) {
     var c = 0;
     var fm = 0;
     var npq = 0;
@@ -43,12 +50,12 @@ rbinom. rbinomOne = function (nin, pp) {
     var ix = 0;
     var k;
     var n;
-    if (!isFinite(nin)){
-        throw "Error"
+    if (!isFinite(size)){
+        throw "Input values should be finite"
     }
-    r = Math.round(nin);
-    // if (r !== nin)
-    //     return NaN
+    r = Math.round(size)
+    if (r !== size)
+        return NaN
     if (!isFinite(pp) ||
         r < 0 ||
         pp < 0 ||
@@ -61,7 +68,6 @@ rbinom. rbinomOne = function (nin, pp) {
         return r;
     if (r >= Number.MAX_SAFE_INTEGER) {
         throw 'Evade overflow' + r + '> MAX_SAFE_INTEGER'
-    //     return qbinom_1.qbinom(Math.random(), r, pp, false, false);
     }
     n = Math.trunc(r);
     p = Math.min(pp, 1 - pp);
@@ -76,8 +82,7 @@ rbinom. rbinomOne = function (nin, pp) {
         if (np < 30.0) {
             qn = rbinom.R_pow_di(q, n);
             gotoL_np_small = true;
-        }
-        else {
+        } else {
             ffm = np + p;
             m = Math.trunc(ffm);
             fm = m;
@@ -95,8 +100,7 @@ rbinom. rbinomOne = function (nin, pp) {
             p3 = p2 + c / xll;
             p4 = p3 + c / xlr;
         }
-    }
-    else if (n === nsave) {
+    } else if (n === nsave) {
         if (np < 30.0)
             gotoL_np_small = true;
     }
@@ -115,15 +119,13 @@ rbinom. rbinomOne = function (nin, pp) {
             if (v > 1.0 || v <= 0)
                 continue;
             ix = Math.trunc(x);
-        }
-        else {
+        } else {
             if (u > p3) {
                 ix = Math.trunc(xr - Math.log(v) / xlr);
                 if (ix > n)
                     continue;
                 v = v * (u - p3) * xlr;
-            }
-            else {
+            } else {
                 ix = Math.trunc(xl + Math.log(v) / xll);
                 if (ix < 0)
                     continue;
@@ -136,17 +138,15 @@ rbinom. rbinomOne = function (nin, pp) {
             if (m < ix) {
                 for (i = m + 1; i <= ix; i++)
                     f *= g / i - r;
-            }
-            else if (m !== ix) {
+            } else if (m !== ix) {
                 for (i = ix + 1; i <= m; i++)
                     f /= g / i - r;
             }
             if (v <= f) {
                 gotoFinis = true;
-                break;
+                break
             }
-        }
-        else {
+        } else {
             amaxp = k / npq * ((k * (k / 3 + 0.625) + 0.1666666666666) / npq + 0.5);
             ynorm = -k * k / (2.0 * npq);
             alv = Math.log(v);
@@ -235,16 +235,3 @@ rbinom.R_pow_di = function (x, n) {
     return pow;
 }
 module.exports = rbinom
-// //# sourceMappingURL=rbinom.js.map
-// let START = new Date()
-// let a = 0
-// // for(let i = 10; i < 1000000; i++) {
-// //     a += rbinomOne(i, .2, 1)
-// // }
-// for(let i = 10; i < 20; i++) {
-    console.log(rbinom.rbinomOne(45099 ,0.000004659592820477343))
-// }
-// console.log(a/1000000, 'running time:',(new Date() - START) / 1000)
-
-
-/////////////////////////////////////////////

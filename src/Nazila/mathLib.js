@@ -5,24 +5,6 @@ let pi = 3.141592654
 var erf = require('math-erf')
 var rbinom = require('./rbinom')
 
-var libUnif = require('lib-r-math.js');
-const {
-    R: { numberPrecision },
-    rng: { MersenneTwister, timeseed }
-} = libUnif
-var U = new MersenneTwister(0)
- // console.log(U.unif_rand());//0.8966972001362592
-
-// const libR = require('lib-r-math.js')
-// //* Set the seed for rbinom-In R: RNGkind("Knuth-TAOCP-2002");set.seed(1234)
-// const {
-//   Binomial,
-//   rng: { KnuthTAOCP2002 }
-// } = libR
-// const kn = new KnuthTAOCP2002(1234)
-// const { rnorm, rbinom } = Binomial(kn)
-// console.log(rbinom(2,40,.5))
-
 mathLib.pnorm = function (x, mu = 0, sd = 1, lower_tail = true, give_log = false) {
   if (sd < 0) {
     return NaN
@@ -180,8 +162,3 @@ mathLib.interpolator = function (points) {
 }
 
 module.exports = mathLib;
-// var START = new Date()
-// for(i=1;i<1000000;i++){
-//   rbinom(1,i,.2)
-// }
-// console.log(new Date() - START)

@@ -208,7 +208,7 @@ for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
               ws += particles[nrow][j]
             }
           } 
-          filterMean[timeCountData][j] = ws / Np//;console.log(ws / Np)
+          filterMean[timeCountData][j] = ws / Np
         } else {      // weighted average
           ws = 0
           for (let nrow =0; nrow < Np; nrow++){
@@ -248,7 +248,7 @@ csvWriter.writeRecords(predictionMean)
 //   console.log('...stateSaved')
 // })
   
-console.log('running time:',new Date() - START)
+console.log('running time:',(new Date() - START) / 1000)
 
 
 
