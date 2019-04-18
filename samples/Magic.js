@@ -47,19 +47,7 @@ function start () {
     reader.readAsText(file)
   }
 
-  // document.getElementById('file2-upload').onchange = function () {
-  //   var file = this.files[0]
-  //   dataInit = []
-  //   var reader = new FileReader ()
-  //   reader.onload = function () {
-  //     var lines = this.result.split('\n')
-  //     for (var line = 1; line < lines.length; line++) {
-  //       dataInit.push(lines[line].split(','))
-  //     }
-  //     console.log(dataInit)
-  //   }
-  //   reader.readAsText(file)
-  // }
+
 
   let computeButton = document.querySelector('button#calc')
   let downloadButton = document.querySelector('button#download')
@@ -94,7 +82,7 @@ function start () {
       // var tem = inputArr[9]
       // inputArr[9] = inputArr[10]
       // inputArr[10] = tem
-      res.push(pfilterCalculation({params:inputArr, Np:100,times:times, dt:1 / 365.25,runPredMean:1,  dataCases:dataCases, dataCovar:dataCovar}))
+      res.push(pfilterCalculation({params:inputArr, Np:1000,times:times, dt:1 / 365.25,runPredMean:1,  dataCases:dataCases, dataCovar:dataCovar}))
         
       console.log(res)
       res.splice(0, 0, ['S', 'E', 'I', 'R', 'H'])
