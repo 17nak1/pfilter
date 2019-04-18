@@ -1,12 +1,12 @@
-'use strict';
-Object.defineProperty(Math.exports, "__esModule", { value: true });
+// 'use strict';
+// Object.defineProperty(Math.exports, "__esModule", { value: true });
 // var debug = require("debug");
 // var _general_1 = require("../common/_general");
-var sMath.exp_1 = require("../Math.exp/sMath.exp");
+// var sMath.exp_1 = require("../Math.exp/sMath.exp");
 var mathLib = require('./mathLib')
 // var r_func_1 = require("../r-func");
 // var fsign_1 = require("../signrank/fsign");
-
+rpois = {}
 var M_1_SQRT_2PI = 1 / Math.sqrt(2 * Math.PI)
 var a0 = -0.5;
 var a1 = 0.3333333;
@@ -24,7 +24,7 @@ var one_24 = 0.0416666666666666667;
 //     return r_func_1.randomGenHelper(n, rpoisOne, mu, rng);
 // }
 // Math.exports.rpois = rpois;
-function rpoisOne(mu, rng) {
+rpois.rpoisOne = function (mu) {
     var fact = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880];
     var l = 0;
     var m = 0;
@@ -88,7 +88,7 @@ function rpoisOne(mu, rng) {
                 q = p0 = p = Math.exp(-mu);
             }
             while (true) {
-                u = rng.unif_rand();
+                u = Math.random();
                 if (u <= p0)
                     return 0;
                 if (l !== 0) {
@@ -113,14 +113,14 @@ function rpoisOne(mu, rng) {
         }
     }
     g =
-        mu + s * rng.norm_randOne();
+        mu + s * mathLib.normalRand()//rng.norm_randOne();
     if (g >= 0) {
         pois = Math.floor(g);
         if (pois >= big_l)
             return pois;
         fk = pois;
         difmuk = mu - fk;
-        u = rng.unif_rand();
+        u = Math.random();
         if (d * u >= difmuk * difmuk * difmuk)
             return pois;
     }
@@ -146,9 +146,9 @@ function rpoisOne(mu, rng) {
             }
         }
         if (!gotoStepF) {
-            E = expRand.exp_rand(Math.random)//sMath.exp_1.Math.exp_rand(rng.unif_rand);
-            u = 2 * rng.unif_rand() - 1;
-            t = 1.8 + mathLib.fsign(E, u >= 0);
+            E = mathLib.expRand(Math.random)//sMath.exp_1.Math.exp_rand(rng.unif_rand);
+            u = 2 * Math.random() - 1;
+            t = 1.8 + mathLib.sign(E, u >= 0);
         }
         if (t > -0.6744 || gotoStepF) {
             if (!gotoStepF) {
@@ -198,4 +198,4 @@ function rpoisOne(mu, rng) {
 }
 
 module.exports = rpois;
-console.log(mathLib.sign(-1))
+// console.log(rpois.rpoisOne(10))
