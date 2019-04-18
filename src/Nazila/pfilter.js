@@ -176,7 +176,8 @@ pfilter.run = function(input){
       for (let j = 0; j< nvars; j++) {
         // compute prediction mean
         if (doPredictionMean || doPredictionVariance) {
-          let sum = 0, nlost = 0
+          var sum = 0
+          nlost = 0
           for (let nrow =0; nrow < Np; nrow++){
             if (particles[nrow][j]) {
               sum += particles[nrow][j]
