@@ -6,6 +6,7 @@ let simulator = require ('./simulator.js')
 let pfilter = {}
 
 pfilter.predictionMean = []
+pfilter.predictionVariance = []
 
 //////////////////////////////////////////data///////////////////////////////////////
 pfilter.run = function(input){
@@ -45,7 +46,7 @@ pfilter.run = function(input){
   let [R0, amplitude, gamma, mu, sigma, rho, psi, S_0, E_0, I_0, R_0] = params
   let nvars = 5
   let deltaT = 14 / 365.25
-  let doPredictionVariance = 0, doPredictionMean = 1, doFilterMean = 0 , allFail = 0
+  let doPredictionVariance = 1, doPredictionMean = 1, doFilterMean = 0 , allFail = 0
 
   let timeLen = dataCases.length 
   let nlost = 0
@@ -225,9 +226,29 @@ pfilter.run = function(input){
     }
   }//endTime
 
-  pfilter.predictionMean = predictionMean
+  // pfilter.prediction = [predictionVariance, predictionVariance]
   console.log(loglik)
+var createCsvWriter = require('csv-writer').createArrayCsvWriter;
+var csvWriter = createCsvWriter({
+    header: ['S', 'E', 'I', 'R', 'H'],
+    path: '../../samples/predmean.csv'
+  })
+  
+  csvWriter.writeRecords(predictionMean)
+    .then(() => {
+    console.log('...predictionMean')
+  })
 
+  var createCsvWriter = require('csv-writer').createArrayCsvWriter;
+  var csvWriter = createCsvWriter({
+    header: ['S', 'E', 'I', 'R', 'H'],
+    path:'../../samples/predvar.csv'
+  })
+  
+  csvWriter.writeRecords(predictionVariance)
+    .then(() => {
+    console.log('...predictionvar')
+  })
       
   console.log('running time:',new Date() - START)
 

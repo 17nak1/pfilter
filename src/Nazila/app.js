@@ -29,13 +29,13 @@ pfilter.run({
     dt : 1 / 365.25,
     times : [1940, 1944]})
 
-const createCsvWriter = require('csv-writer').createArrayCsvWriter;
-  const csvWriter = createCsvWriter({
-    header: ['S', 'E', 'I', 'R', 'H'],
-    path: rootDir+'/../samples/predmean.csv'
-  })
+// const createCsvWriter = require('csv-writer').createArrayCsvWriter;
+//   const csvWriter = createCsvWriter({
+//     header: ['S', 'E', 'I', 'R', 'H'],
+//     path: rootDir +'/../samples/predmean.csv'
+//   })
   
-  csvWriter.writeRecords(pfilter.predictionMean)
-    .then(() => {
-    console.log('...predictionMean')
-  })
+//   csvWriter.writeRecords(pfilter.predictionMean)
+//     .then(() => {
+//     console.log('...predictionMean')
+//   })
