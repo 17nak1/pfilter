@@ -2,6 +2,7 @@ let fmin = require ('fmin')
 let mathLib = require('./mathLib')
 let snippet = require('./modelSnippet.js')
 let simulator = require ('./simulator.js')
+let rpois = require('./rpois')
 
 let pfilter = {}
 
@@ -32,8 +33,8 @@ pfilter.run = function(input){
 
   console.log("Np",Np)
 
-  let d1 = []// read time and population from 1st data and make interpolation function
-  let d2 = []// read time and birthrate from 1st data and make interpolation function
+  let d1 = [] // read time and population from 1st data and make interpolation function
+  let d2 = [] // read time and birthrate from 1st data and make interpolation function
   for (let i = 0; i < dataCovar.length - 1; i++) {
     d1.push([Number(dataCovar[i][0]), Number(dataCovar[i][1])])
     d2.push([Number(dataCovar[i][0]), Number(dataCovar[i][2])])
@@ -105,32 +106,30 @@ pfilter.run = function(input){
       st = k + stp * del_t
       pop = interpolPop(st)
       birthrate = interpolBirth(st)
-      births = mathLib.rpois(birthrate * (1- snippet.rprocessVaccine(st)) * del_t )
-        for (np = 0; np < Np; np++){ //calc for each particle
-          trans = []
-          S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
-          simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], pop, births)
-          temp[np][0] = simulateValue[0]; temp[np][1] = simulateValue[1]; temp[np][2] = simulateValue[2]; temp[np][3] = simulateValue[3]; temp[np][4] = simulateValue[4]
-        }
+      for (np = 0; np < Np; np++){ //calc for each particle
+        trans = []
+        S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
+        simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], pop, birthrate)
+        temp[np][0] = simulateValue[0]; temp[np][1] = simulateValue[1]; temp[np][2] = simulateValue[2]; temp[np][3] = simulateValue[3]; temp[np][4] = simulateValue[4]
       }
-      for (np = 0; np < Np; np++){ 
-        particles[np][0] = temp[np][0]
-        particles[np][1] = temp[np][1]
-        particles[np][2] = temp[np][2]
-        particles[np][3] = temp[np][3]
-        particles[np][4] = temp[np][4]
-        H = temp[np][4]
-    //***********weight*************
-        if (k >= Number(dataCases[0][0])){
-          if (stateSaved) {
-            stateSaved.push(particles[np]) //[S,E,I,R,H])
-          }
-          modelCases = Number(dataCases[timeCountData][1])
-          likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
-          weights.push(likvalue)           
+    }
+    for (np = 0; np < Np; np++){ 
+      particles[np][0] = temp[np][0]
+      particles[np][1] = temp[np][1]
+      particles[np][2] = temp[np][2]
+      particles[np][3] = temp[np][3]
+      particles[np][4] = temp[np][4]
+      H = temp[np][4]
+      //***********weight*************
+      if (k >= Number(dataCases[0][0])){
+        if (stateSaved) {
+          stateSaved.push(particles[np]) //[S,E,I,R,H])
         }
+        modelCases = Number(dataCases[timeCountData][1])
+        likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
+        weights.push(likvalue)           
       }
-    
+    }
     
     //normalize
     if (k >= Number(dataCases[0][0])){

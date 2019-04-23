@@ -1,12 +1,8 @@
-// 'use strict';
-// Object.defineProperty(Math.exports, "__esModule", { value: true });
-// var debug = require("debug");
-// var _general_1 = require("../common/_general");
-// var sMath.exp_1 = require("../Math.exp/sMath.exp");
+
 var mathLib = require('./mathLib')
-// var r_func_1 = require("../r-func");
-// var fsign_1 = require("../signrank/fsign");
+
 rpois = {}
+
 var M_1_SQRT_2PI = 1 / Math.sqrt(2 * Math.PI)
 var a0 = -0.5;
 var a1 = 0.3333333;
@@ -19,11 +15,7 @@ var a7 = 0.125006;
 var one_7 = 0.1428571428571428571;
 var one_12 = 0.0833333333333333333;
 var one_24 = 0.0416666666666666667;
-// var printer_rpois = debug('rpois');
-// function rpois(n, mu, rng) {
-//     return r_func_1.randomGenHelper(n, rpoisOne, mu, rng);
-// }
-// Math.exports.rpois = rpois;
+
 rpois.rpoisOne = function (mu) {
     var fact = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880];
     var l = 0;
@@ -112,8 +104,7 @@ rpois.rpoisOne = function (mu) {
             }
         }
     }
-    g =
-        mu + s * mathLib.normalRand()//rng.norm_randOne();
+    g = mu + s * mathLib.normalRand()//rng.norm_randOne();
     if (g >= 0) {
         pois = Math.floor(g);
         if (pois >= big_l)

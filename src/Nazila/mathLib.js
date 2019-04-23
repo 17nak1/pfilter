@@ -1,9 +1,15 @@
 
 var mathLib = {}
-let exp = 2.718281828
-let pi = 3.141592654
-var erf = require('math-erf')
-var rbinom = require('./rbinom')
+
+
+let erf = require('math-erf')
+let rbinom = require('./rbinom')
+var libUnif = require('lib-r-math.js');
+const {
+    R: { numberPrecision },
+    rng: { MersenneTwister, timeseed }
+} = libUnif
+var U = new MersenneTwister(0) 
 
 mathLib.pnorm = function (x, mu = 0, sd = 1, lower_tail = true, give_log = false) {
   if (sd < 0) {
@@ -54,7 +60,7 @@ mathLib.nosortResamp = function (nw, w, np, p, offset) {
     throw "in 'systematic_resampling': non-positive sum of weight"
   }
   var du = w[nw - 1] / np
-  var u = -du * Math.random()// U.unif_rand()
+  var u = -du * U.unif_rand()//Math.random()// U.unif_rand()
 
   for (j = 0, i = 0; j < np; j++) {
     u += du
@@ -101,14 +107,14 @@ mathLib.reulermultinom = function (m = 1, size, rateAdd, dt, transAdd, rate, tra
   }
 }
 
-mathLib.rpois = function (lambda = 1) {
-  var k = 0; p = 1; l= Math.exp(-lambda)
-  while (p > l) { 
-    k += 1
-    p = p * Math.random()
-  }
-  return k-1
-}
+// mathLib.rpois = function (lambda = 1) {
+//   var k = 0; p = 1; l= Math.exp(-lambda)
+//   while (p > l) { 
+//     k += 1
+//     p = p * Math.random()
+//   }
+//   return k-1
+// }
 
 mathLib.interpolator = function (points) {
   var first, n = points.length - 1,
@@ -159,6 +165,62 @@ mathLib.interpolator = function (points) {
     }
     return rightExtrapolated(x);
   }
+}
+
+mathLib.sign = function (x, signal) {
+  if (isNaN(x))
+      return x
+  return signal ? Math.abs(x) : -Math.abs(x);
+}
+
+mathLib.expRand = function (uniformRand) {
+    var q = [
+        0.6931471805599453,
+        0.9333736875190459,
+        0.9888777961838675,
+        0.9984959252914960,
+        0.9998292811061389,
+        0.9999833164100727,
+        0.9999985691438767,
+        0.9999998906925558,
+        0.9999999924734159,
+        0.9999999995283275,
+        0.9999999999728814,
+        0.9999999999985598,
+        0.9999999999999289,
+        0.9999999999999968,
+        0.9999999999999999,
+        1.0000000000000000
+    ];
+    var a = 0.;
+    var u = uniformRand();
+    while (u <= 0. || u >= 1.)
+        u = uniformRand();
+    while (true) {
+        u += u;
+        if (u > 1.)
+            break;
+        a += q[0];
+    }
+    u -= 1.;
+    if (u <= q[0])
+      return a + u
+    var i = 0;
+    var ustar = uniformRand();
+    var umin = ustar;
+    do {
+        ustar = uniformRand();
+        if (umin > ustar)
+            umin = ustar;
+        i++;
+    } while (u > q[i]);
+    return a + umin * q[0];
+}
+mathLib.normalRand =function() {
+    var u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v )
 }
 
 module.exports = mathLib;

@@ -4,7 +4,8 @@
  * References                Jacob K.F. Bogers  info@mail.jacob-bogers.com
  *                           https://github.com/R-js/libRmath.js/blob/master/src/lib/binomial/rbinom.ts
  */
-
+// let rng = require('./rng.js')
+// rndamir.init(1234)
 rbinom = {}
 
 rbinom. rbinomOne = function (size, pp) {
@@ -106,8 +107,8 @@ rbinom. rbinomOne = function (size, pp) {
     }
     var gotoFinis = false;
     while (true && !gotoL_np_small) {
-        u = Math.random() * p4;
-        v = Math.random();
+        u = Math.random() * p4; // rng.unif_rand()
+        v = Math.random(); // rng.unif_rand
         if (u <= p1) {
             ix = Math.trunc(xm - p1 * v + u);
             gotoFinis = true;
@@ -189,7 +190,7 @@ rbinom. rbinomOne = function (size, pp) {
         while (true) {
             ix = 0;
             f = qn;
-            u = Math.random()//Math.random();
+            u = Math.random() // rng.unif_rand
             while (true) {
                 if (u < f) {
                     gotoFinis = true;
@@ -234,4 +235,8 @@ rbinom.R_pow_di = function (x, n) {
     }
     return pow;
 }
+// rbinom.random = function () {
+//     return rng.genrand_real3()//0.000002//Math.random()
+// }
 module.exports = rbinom
+// console.log(rng.genrand_real3())
