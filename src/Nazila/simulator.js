@@ -5,12 +5,11 @@ let snippet = require('./modelSnippet.js')
 simulator = {}
 simulator.simulate = function (Np, temp, k, deltaT, dt, interpolPop, interpolBirth, params, t1,t2 ) {
   var st, S, E, I, R, H, steps, simulateValue 
-  // S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
   // transitions between classes
-  if (k <= t1) {//t1
+  if (k <= t1) {
         steps = mathLib.numMapSteps(k, k + deltaT, dt)
     } else {
-        steps = mathLib.numEulerSteps(k, t2, dt)//t2
+        steps = mathLib.numEulerSteps(k, t2, dt)
     }
       del_t = (1 / steps )* deltaT
 
