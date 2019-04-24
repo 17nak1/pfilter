@@ -27,7 +27,7 @@ function pfilterCalculation (input) {//filter.traj , save.params
   pfilter.run(input)
 
   activateDownload ()
-
+  console.log(pfilter.prediction)
   return pfilter.predictionMean
 
 //    if (input.runPredMean) {

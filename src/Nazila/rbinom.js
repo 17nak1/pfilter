@@ -22,7 +22,7 @@ rbinom. rbinomOne = function (size, pp) {
     var xlr = 0;
     var xm = 0;
     var xr = 0;
-    var psave = -1.0;
+    var psave = -1
     var nsave = -1;
     var m = 0;
     var f;

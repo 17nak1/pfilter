@@ -81,7 +81,7 @@ pfilter.run = function(input){
   var particles = new Array(Np).fill(null).map(() => [].concat(state));
   temp = new Array(Np).fill(null).map(() => [].concat(state))
   // Time loop
-  for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){//Number(dataCases[timeLen - 2][0]) + deltaT / 3
+  for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
     if ( k > tdata - deltaT && k <= tdata) {
       k = tdata
     }
@@ -94,25 +94,8 @@ pfilter.run = function(input){
         temp[np][nvars - 1] = 0
       }
     } 
+    temp = simulator.simulate (Np, temp, k, deltaT, dt, interpolPop, interpolBirth, params, Number(dataCases[0][0]),Number(dataCases[timeCountData + 1][0]))
     
-    // if (k <= tdata || k > Number(dataCases[dataCases.length - 1])) {
-        steps = mathLib.numMapSteps(k, k + deltaT, dt)
-    // } else {
-    //     steps = mathLib.numEulerSteps(k, Number(dataCases[timeCountData + 1][0]), dt)
-    // }
-      del_t = (1 / steps )* deltaT
-
-    for (let stp = 0; stp < steps; stp++) { // steps in each time interval
-      st = k + stp * del_t
-      pop = interpolPop(st)
-      birthrate = interpolBirth(st)
-      for (np = 0; np < Np; np++){ //calc for each particle
-        trans = []
-        S = temp[np][0]; E = temp[np][1]; I = temp[np][2]; R = temp[np][3]; H = temp[np][4]
-        simulateValue = snippet.rprocess(params, st, del_t, [S,E,I,R,H], pop, birthrate)
-        temp[np][0] = simulateValue[0]; temp[np][1] = simulateValue[1]; temp[np][2] = simulateValue[2]; temp[np][3] = simulateValue[3]; temp[np][4] = simulateValue[4]
-      }
-    }
     for (np = 0; np < Np; np++){ 
       particles[np][0] = temp[np][0]
       particles[np][1] = temp[np][1]
@@ -120,7 +103,7 @@ pfilter.run = function(input){
       particles[np][3] = temp[np][3]
       particles[np][4] = temp[np][4]
       H = temp[np][4]
-      //***********weight*************
+      // Weight
       if (k >= Number(dataCases[0][0])){
         if (stateSaved) {
           stateSaved.push(particles[np]) //[S,E,I,R,H])
@@ -131,7 +114,7 @@ pfilter.run = function(input){
       }
     }
     
-    //normalize
+    // Normalize
     if (k >= Number(dataCases[0][0])){
       let sumOfWeights = 0
       for (let i = 0; i < Np; i++) {
@@ -140,7 +123,7 @@ pfilter.run = function(input){
       for (let i = 0; i < Np; i++) {
         normalWeights[i] = weights[i] / sumOfWeights
       }
-      // check the weights and compute sum and sum of squares
+      // Check the weights and compute sum and sum of squares
       w = 0, ws = 0, nlost = 0
       for (let i = 0; i < Np; i++) {
         if (weights[i] > toler) {
@@ -225,8 +208,8 @@ pfilter.run = function(input){
     }
   }//endTime
 
-  // pfilter.prediction = [predictionVariance, predictionVariance]
-  console.log(loglik)
+pfilter.predictionMean = predictionMean
+console.log(loglik)
 var createCsvWriter = require('csv-writer').createArrayCsvWriter;
 var csvWriter = createCsvWriter({
     header: ['S', 'E', 'I', 'R', 'H'],

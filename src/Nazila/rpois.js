@@ -104,7 +104,7 @@ rpois.rpoisOne = function (mu) {
             }
         }
     }
-    g = mu + s * mathLib.normalRand()//rng.norm_randOne();
+    g = mu + s * Math.random() //mathLib.normalRand()//rng.norm_randOne();
     if (g >= 0) {
         pois = Math.floor(g);
         if (pois >= big_l)
