@@ -35,7 +35,7 @@ pfilter.run = function(input){
 
   let d1 = [] // read time and population from 1st data and make interpolation function
   let d2 = [] // read time and birthrate from 1st data and make interpolation function
-  for (let i = 0; i < dataCovar.length - 1; i++) {
+  for (let i = 0; i < dataCovar.length; i++) {
     d1.push([Number(dataCovar[i][0]), Number(dataCovar[i][1])])
     d2.push([Number(dataCovar[i][0]), Number(dataCovar[i][2])])
   }
