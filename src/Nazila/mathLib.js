@@ -48,7 +48,7 @@ mathLib.numMapSteps = function (t1, t2, dt) {
   var tol = Math.sqrt(DOUBLE_EPS)
   var nstep
   // nstep will be the number of discrete-time steps to take in going from t1 to t2.
-  nstep = Math.floor((t2 - t1) / dt /(1 - tol))
+  nstep = Math.floor((t2 - t1) / dt /(1 + tol))
   return (nstep > 0) ? nstep : 0
 }
 

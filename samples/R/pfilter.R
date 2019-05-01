@@ -35,7 +35,7 @@ rproc <- Csnippet("
                   //printf(\"%f birthrate %f pop %f\\n\", t, birthrate, pop);
                   // Poisson births
                   births = rpois(birthrate*(1-va)*dt);
-                  printf(\" %f, %f \\n\", t, births);
+                  //printf(\" %f, %f \\n\", t, births);
                   // transitions between classes
                   reulermultinom(2,S,&rate[0],dt,&trans[0]);
                   reulermultinom(2,E,&rate[2],dt,&trans[2]);
@@ -149,7 +149,7 @@ current_params= c(R0=3.132490e+01 , amplitude=3.883620e-01 , gamma=7.305000e+01 
 
 setwd(cureentfolder)
 tstart = 1
-tend = 548
+tend = 651
 datasetj <- as.data.frame(read.csv('predmean.csv'))
 pfilter(m1,params=current_params,Np=10,filter.mean = T,pred.mean=T, max.fail=3000) -> ss
 datapredict <- as.data.frame(ss@pred.mean)
@@ -159,3 +159,4 @@ points(pm[c(tstart:tend)], type ="l")
 
 end_time <- Sys.time()
 end_time - start_time
+ss@loglik

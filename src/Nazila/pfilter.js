@@ -81,20 +81,17 @@ pfilter.run = function(input){
   var particles = new Array(Np).fill(null).map(() => [].concat(state));
   temp = new Array(Np).fill(null).map(() => [].concat(state))
   // Time loop
-  for (k = t0; k <= Number(dataCases[timeLen - 2][0]) + deltaT / 3 ; k += deltaT){
-    if ( k > tdata - deltaT && k <= tdata) {
-      k = tdata
-    }
+  k = t0
+  ntimesk =  dataCases.length
+  for (indexk = 0; indexk < ntimesk; indexk++){
     weights = []; normalWeights = []
-    
-    if ( k > t0) {
-      for (np = 0; np < Np; np++) { // copy the particles
-        temp[np] = [].concat(particles[sampleNum[np]])
-
-        temp[np][nvars - 1] = 0
-      }
-    } 
-    temp = simulator.simulate (Np, temp, k, deltaT, dt, interpolPop, interpolBirth, params, Number(dataCases[0][0]),Number(dataCases[timeCountData + 1][0]))
+    k2 =  Number(dataCases[indexk][0])
+    for (np = 0; np < Np; np++) { // copy the particles
+      temp[np] = [].concat(particles[sampleNum[np]])
+      temp[np][nvars - 1] = 0
+    }
+ 
+    temp = simulator.simulate (Np, temp, dt, interpolPop, interpolBirth, params, k, k2)
     
     for (np = 0; np < Np; np++){ 
       particles[np][0] = temp[np][0]
@@ -104,18 +101,17 @@ pfilter.run = function(input){
       particles[np][4] = temp[np][4]
       H = temp[np][4]
       // Weight
-      if (k >= Number(dataCases[0][0])){
+
         if (stateSaved) {
           stateSaved.push(particles[np]) //[S,E,I,R,H])
         }
         modelCases = Number(dataCases[timeCountData][1])
         likvalue = snippet.dmeasure(rho, psi, H, modelCases, giveLog = 0)
         weights.push(likvalue)           
-      }
+
     }
     
     // Normalize
-    if (k >= Number(dataCases[0][0])){
       let sumOfWeights = 0
       for (let i = 0; i < Np; i++) {
         sumOfWeights += weights[i]
@@ -205,7 +201,7 @@ pfilter.run = function(input){
         }
       }
       timeCountData++
-    }
+      k = k2
   }//endTime
 
 pfilter.predictionMean = predictionMean
@@ -213,7 +209,7 @@ console.log(loglik)
 var createCsvWriter = require('csv-writer').createArrayCsvWriter;
 var csvWriter = createCsvWriter({
     header: ['S', 'E', 'I', 'R', 'H'],
-    path: '../../samples/predmean.csv'
+    path: rootDir + '/../samples/predmean.csv'
   })
   
   csvWriter.writeRecords(predictionMean)
@@ -224,7 +220,7 @@ var csvWriter = createCsvWriter({
   var createCsvWriter = require('csv-writer').createArrayCsvWriter;
   var csvWriter = createCsvWriter({
     header: ['S', 'E', 'I', 'R', 'H'],
-    path:'../../samples/predvar.csv'
+    path: rootDir + '/../samples/predvar.csv'
   })
   
   csvWriter.writeRecords(predictionVariance)
