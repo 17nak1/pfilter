@@ -1,5 +1,5 @@
 fs = require('fs')
-rootDir = '..'
+rootDir = '~'
 
 let pfilter = require('./pfilter.js')
 
@@ -22,12 +22,14 @@ let dataCovar = []
   }
 
 pfilter.run({
+    maxFail : 500,
     dataCases : dataCases,
     dataCovar : dataCovar,
     params : [3.132490e+01, 3.883620e-01, 7.305000e+01, 6.469830e-04, 4.566000e+01, 4.598709e-01, 1.462546e-01, 3.399189e-02, 2.336327e-04, 4.221789e-07, 9.657741e-01 ],
-    Np : 100,
+    Np : 1000,
     dt : 1 / 365.25,
-    times : [1940, 1944]})
+    times : [1940, 1944.07665982204]})
+
 
 // const createCsvWriter = require('csv-writer').createArrayCsvWriter;
 //   const csvWriter = createCsvWriter({
@@ -39,3 +41,22 @@ pfilter.run({
 //     .then(() => {
 //     console.log('...predictionMean')
 //   })
+
+// var res = new Array()
+// for(let i = 0; i< 100; i++){
+//   console.log(i)
+//   var tres = pfilter.run({
+//     dataCases : dataCases,
+//     dataCovar : dataCovar,
+//     params : [3.132490e+01, 3.883620e-01, 7.305000e+01, 6.469830e-04, 4.566000e+01, 4.598709e-01, 1.462546e-01, 3.399189e-02, 2.336327e-04, 4.221789e-07, 9.657741e-01 ],
+//     Np : 1000,
+//     dt : 1 / 365.25,
+//     times : [1940, 1944.07665982204]})
+//     res.push(tres);
+// }
+
+
+// var file = fs.createWriteStream(rootDir +'/../samples/resjs.txt');
+// file.on('error', function(err) { /* error handling */ });
+// res.forEach(function(v) { file.write(Math.round (v) + '\n'); });
+// file.end();

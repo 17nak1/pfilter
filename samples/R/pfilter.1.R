@@ -65,12 +65,10 @@ initz <- Csnippet("
                   ")
 # Sampling from the normal approximation of the binomial distribution
 dmeas <- Csnippet("
-
                   double m = rho*H;
                   double v = m*(1.0-rho+psi*psi*m);
                   double tol = 1.0e-18;
                   if (R_FINITE(cases)) {
-//printf(\" %f %lf \\n\", H, cases);
                   if (cases > 0.0) {
                   lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
                   } else {
@@ -155,28 +153,17 @@ current_params= c(R0=3.132490e+01 , amplitude=3.883620e-01 , gamma=7.305000e+01 
 # hast. satre aval "S" ro mitooni ba in dastoor bebini.
 
 setwd(cureentfolder)
-tstart = 1
+res <- c()
+for (val in c(1:100))
+{
+  print(val)
+  pfilter(m1,params=current_params,Np=1000,filter.mean = T,pred.mean=T, max.fail=3000) -> ss
+  print(ss@loglik)
+  res <- c(res,round(ss@loglik))
+}
 
-datasetj <- as.data.frame(read.csv('predmean.csv'))
-tend = dim(datasetj)[1]
-pfilter(m1,params=current_params,Np=1000,filter.mean = T,pred.mean=T, max.fail=500) -> ss
-datapredict <- as.data.frame(ss@pred.mean)
-pmS=c();pmE=c();pmR=c();pmI=c();pmH=c();for(i in tstart:tend){pmS[i]=datapredict[1,i];pmE[i]=datapredict[2,i];pmR[i]=datapredict[3,i];pmI[i]=datapredict[4,i];pmH[i]=datapredict[5,i];}
-
-par(mfrow=c(3,2))
-plot(datasetj$S[c(tstart:tend)], type ="l",main="S",col = "red", ylab = "JS")
-points(pmS[c(tstart:tend)], type ="l")
-plot(datasetj$E[c(tstart:tend)], type ="l",main="E",col = "red", ylab = "JS")
-points(pmE[c(tstart:tend)], type ="l")
-plot(datasetj$R[c(tstart:tend)], type ="l",main="R",col = "red", ylab = "JS")
-points(pmI[c(tstart:tend)], type ="l")
-plot(datasetj$I[c(tstart:tend)], type ="l",main="I",col = "red", ylab = "JS")
-points(pmR[c(tstart:tend)], type ="l")
-plot(datasetj$H[c(tstart:tend)], type ="l",main="H",col = "red", ylab = "JS")
-points(pmH[c(tstart:tend)], type ="l")
-
-write.csv(datapredict, file.path(cureentfolder, "predmeanr.csv"))
+write.csv(res, file.path(cureentfolder, "resr.txt"))
 
 end_time <- Sys.time()
 end_time - start_time
-ss@loglik
+
