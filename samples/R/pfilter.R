@@ -158,12 +158,14 @@ setwd(cureentfolder)
 tstart = 1
 
 datasetj <- as.data.frame(read.csv('predmean.csv'))
+condLoglik <- as.data.frame(read.csv('condLoglik.csv'))
+
 tend = dim(datasetj)[1]
 pfilter(m1,params=current_params,Np=1000,filter.mean = T,pred.mean=T, max.fail=500) -> ss
 datapredict <- as.data.frame(ss@pred.mean)
-pmS=c();pmE=c();pmR=c();pmI=c();pmH=c();for(i in tstart:tend){pmS[i]=datapredict[1,i];pmE[i]=datapredict[2,i];pmR[i]=datapredict[3,i];pmI[i]=datapredict[4,i];pmH[i]=datapredict[5,i];}
+pmS=c();pmE=c();pmR=c();pmI=c();pmH=c();pmlik=c();for(i in tstart:tend){pmS[i]=datapredict[1,i];pmE[i]=datapredict[2,i];pmR[i]=datapredict[3,i];pmI[i]=datapredict[4,i];pmH[i]=datapredict[5,i];}
 
-par(mfrow=c(3,2))
+par(mfrow=c(2,3))
 plot(datasetj$S[c(tstart:tend)], type ="l",main="S",col = "red", ylab = "JS")
 points(pmS[c(tstart:tend)], type ="l")
 plot(datasetj$E[c(tstart:tend)], type ="l",main="E",col = "red", ylab = "JS")
@@ -174,8 +176,11 @@ plot(datasetj$I[c(tstart:tend)], type ="l",main="I",col = "red", ylab = "JS")
 points(pmR[c(tstart:tend)], type ="l")
 plot(datasetj$H[c(tstart:tend)], type ="l",main="H",col = "red", ylab = "JS")
 points(pmH[c(tstart:tend)], type ="l")
+plot(condLoglik$lik[c(tstart:tend)], type ="l",main="lik",col = "red", ylab = "JS")
+points(ss$cond.loglik[c(tstart:tend)], type ="l")
 
 write.csv(datapredict, file.path(cureentfolder, "predmeanr.csv"))
+write.csv(ss$cond.loglik, file.path(cureentfolder, "condLoglikr.csv"))
 
 end_time <- Sys.time()
 end_time - start_time

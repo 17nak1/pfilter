@@ -46,26 +46,23 @@ pfilter.run = function(input){
 
   let [R0, amplitude, gamma, mu, sigma, rho, psi, S_0, E_0, I_0, R_0] = params
   let nvars = 5
-  let deltaT = 14 / 365.25
   let doPredictionVariance = 1, doPredictionMean = 1, doFilterMean = 0 , allFail = 0
 
   let timeLen = dataCases.length 
   let nlost = 0
 
-  let rate = [], trans = []
   var particles = new Array(Np).fill(null).map(() => Array(5)),
   state =[]
   let sampleNum = Array.from(Array(Np).keys())
   let condLoglik = []
   let stateSaved = []
   let temp 
-  let timeCountData = 0, ws ,w , vsq, sumsq, ess, loglik = 0, lik 
+  let ws ,w , vsq, sumsq, ess, loglik = 0, lik 
 
   let predictionMean, predictionVariance, filterMean
-  let states = Array(Np).fill(null).map(() => Array(nvars))
-  let weights, normalWeights, S, E, I, R, del_t, ST, simulateValue
+
+  let weights
   let modelCases, likvalue
-  var st, births, pop,birthrate
   if (doPredictionMean) {
     predictionMean = Array(timeLen).fill(null).map(() => Array(nvars))
   }
@@ -78,28 +75,19 @@ pfilter.run = function(input){
 
   state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
   // First Np sets
-  var particles = new Array(Np).fill(null).map(() => [].concat(state));
-  temp = new Array(Np).fill(null).map(() => [].concat(state))
+  temp = new Array(Np).fill(null).map(() => [].concat(state));
   // Time loop
   k = t0
-  ntimesk =  dataCases.length
-  for (indexk = 0; indexk < ntimesk; indexk++){
+
+  for (timeCountData = 0; timeCountData < timeLen; timeCountData++){
+
     weights = []; normalWeights = []
-    k2 =  Number(dataCases[indexk][0])
-    for (np = 0; np < Np; np++) { // copy the particles
-      temp[np] = [].concat(particles[sampleNum[np]])
-      temp[np][nvars - 1] = 0
-    }
+    k2 =  Number(dataCases[timeCountData][0])
  
-    temp = simulator.simulate (Np, temp, dt, interpolPop, interpolBirth, params, k, k2)
+    particles = simulator.simulate (Np, temp, dt, interpolPop, interpolBirth, params, k, k2)
     
     for (np = 0; np < Np; np++){ 
-      particles[np][0] = temp[np][0]
-      particles[np][1] = temp[np][1]
-      particles[np][2] = temp[np][2]
-      particles[np][3] = temp[np][3]
-      particles[np][4] = temp[np][4]
-      H = temp[np][4]
+        H = particles[np][4]
       // Weight
 
         if (stateSaved) {
@@ -111,15 +99,6 @@ pfilter.run = function(input){
 
     }
     
-    // Normalize
-      let sumOfWeights = 0
-      for (let i = 0; i < Np; i++) {
-        sumOfWeights += weights[i]
-      }
-      for (let i = 0; i < Np; i++) {
-        normalWeights[i] = weights[i] / sumOfWeights
-      }
-      // Check the weights and compute sum and sum of squares
       w = 0, ws = 0, nlost = 0
       for (let i = 0; i < Np; i++) {
         if (weights[i] > toler) {
@@ -130,9 +109,9 @@ pfilter.run = function(input){
           nlost++
         }
       }
-      if (nlost > maxFail) {
-        throw 'execution terminated. The number of filtering failures exceeds the maximum number of filtering failures allowed. '
-      }
+      // if (nlost > maxFail) {
+      //   throw 'execution terminated. The number of filtering failures exceeds the maximum number of filtering failures allowed. '
+      // }
       if (nlost >= Np) { 
         allFail = 1 // all particles are lost
       } else {
@@ -149,7 +128,6 @@ pfilter.run = function(input){
       condLoglik[timeCountData] = [timeCountData + 1, lik]
       // the total conditional logliklihood in the time process is loglik
       loglik += lik
-      mathLib.nosortResamp(Np, normalWeights, Np, sampleNum, 0)
       
       // Compute outputs
       for (let j = 0; j< nvars; j++) {
@@ -200,7 +178,21 @@ pfilter.run = function(input){
           }
         }
       }
-      timeCountData++
+
+
+      if (!allFail) {
+        mathLib.nosortResamp(Np, weights, Np, sampleNum, 0)
+        for (np = 0; np < Np; np++) { // copy the particles
+          temp[np] = [].concat(particles[sampleNum[np]])
+          temp[np][nvars - 1] = 0
+        }
+      } else {
+        for (np = 0; np < Np; np++) { // copy the particles
+          temp[np] = [].concat(particles[np])
+          temp[np][nvars - 1] = 0
+        }
+      }
+
       k = k2
   }//endTime
 
@@ -226,6 +218,17 @@ var csvWriter = createCsvWriter({
   csvWriter.writeRecords(predictionVariance)
     .then(() => {
     console.log('...predictionvar')
+  })
+
+  var createCsvWriter = require('csv-writer').createArrayCsvWriter;
+  var csvWriter = createCsvWriter({
+    header: ['lik'],
+    path: rootDir + '/../samples/condLoglik.csv'
+  })
+  
+  csvWriter.writeRecords(condLoglik)
+    .then(() => {
+    console.log('...condLoglik')
   })
       
   console.log('running time:',new Date() - START)
