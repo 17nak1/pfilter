@@ -1,23 +1,23 @@
 
 snippet = {}
 let mathLib = require('./mathLib')
-let rpois = require('./rpois')
+//let rpois = require('./rpois')
 //* Set the seed for rnorm-In R:RNGkind("L'Ecuyer-CMRG", normal.kind="Box-Muller");set.seed(1234) 
-// const libR = require('lib-r-math.js')
-// const {
-//   Poisson,
-//   rng: { MersenneTwister },
-//   rng: { normal: { Inversion } }
-// } = libR
-// const mt = new MersenneTwister(0)// 
-// const { rpois } = Poisson(new Inversion(mt))
-// mt.init(1234)
+const libR = require('lib-r-math.js')
+const {
+  Poisson,
+  rng: { MersenneTwister },
+  rng: { normal: { Inversion } }
+} = libR
+const mt = new MersenneTwister(0)// 
+const { rpois } = Poisson(new Inversion(mt))
+mt.init(1234)
 snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
-  var seas, beta, beta0, foi, R0, tt, va
-  var trans = new Array(6).fill(0)
-  var rate = new Array(6) 
-  var deltaT = 14 / 365.25
-  var dt = 1 / 365.25 
+  let seas, beta, beta0, foi, R0, tt, va
+  let trans = new Array(6).fill(0)
+  let rate = new Array(6) 
+  let deltaT = 14 / 365.25
+  let dt = 1 / 365.25 
   
   R0 = params[0], amplitude = params[1], gamma = params[2], mu = params[3], sigma = params[4] 
   beta0 = R0 * (gamma + mu) * (sigma + mu) / sigma
@@ -38,7 +38,7 @@ snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   rate[4] = gamma// recovery
   rate[5] = mu// natural I death 
    
-  births = rpois.rpoisOne(birthrate * (1 - va) * del_t )// Poisson births
+  let births = rpois(1,birthrate * (1 - va) * del_t )// Poisson births
   mathLib.reulermultinom(2, Math.round(S), 0, del_t, 0, rate, trans)
   mathLib.reulermultinom(2, Math.round(E), 2, del_t, 2, rate, trans)
   mathLib.reulermultinom(2, Math.round(I), 4, del_t, 4, rate, trans)
@@ -50,7 +50,7 @@ snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   return [S, E, I, R, H]
 }
 snippet.rprocessVaccine = function(t) {
-  var vaccineRate
+  let vaccineRate
   if (t < 1968)
     vaccineRate = 0
   else if (t >= 1968 && t <= 1969)
@@ -138,8 +138,8 @@ snippet.rprocessVaccine = function(t) {
   return vaccineRate
 }
 
-snippet.initz = function(pop, S_0, E_0, I_0, R_0, H) {
-  var m = pop / (S_0 + E_0 + R_0 + I_0),
+snippet.initz = function(pop, S_0, E_0, I_0, R_0) {
+  let m = pop / (S_0 + E_0 + R_0 + I_0),
     S = Math.round(m * S_0),
     E = Math.round(m * E_0),
     I = Math.round(m * I_0),
@@ -149,11 +149,11 @@ snippet.initz = function(pop, S_0, E_0, I_0, R_0, H) {
 }
 
 snippet.dmeasure = function (rho, psi, H, dCases, giveLog = 1) {
-  var lik
-  var mn = rho * H
-  var v = mn * (1.0 - rho + psi * psi * mn)
-  var tol = 1.0e-18
-  var modelCases = Number(dCases)
+  let lik
+  let mn = rho * H
+  let v = mn * (1.0 - rho + psi * psi * mn)
+  let tol = 1.0e-18
+  let modelCases = Number(dCases)
   if(!isNaN(modelCases)){
     if (modelCases > 0.0) {
       lik = mathLib.pnorm(modelCases + 0.5, mn, Math.sqrt(v) + tol, 1, 0) - mathLib.pnorm(modelCases - 0.5, mn, Math.sqrt(v) + tol, 1, 0) + tol
@@ -168,10 +168,10 @@ snippet.dmeasure = function (rho, psi, H, dCases, giveLog = 1) {
 }
 
 snippet.rmeasure = function (H, rho, psi) {
-  var mn = rho * H
-  var v = mn * (1.0 - rho + psi * psi * mn)
-  var tol = 1.0e-18
-  var cases = mathLib.rnorm(mn, Math.sqrt(v) + tol)
+  let mn = rho * H
+  let v = mn * (1.0 - rho + psi * psi * mn)
+  let tol = 1.0e-18
+  let cases = mathLib.rnorm(mn, Math.sqrt(v) + tol)
   if (cases > 0) {
     cases = Math.round(cases)
   } else {

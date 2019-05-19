@@ -2,9 +2,9 @@
 let mathLib = require('./mathLib.js')
 let snippet = require('./modelSnippet.js')
 
-simulator = {}
+let simulator = {}
 simulator.simulate = function (Np, temp2, dt, interpolPop, interpolBirth, params, t1,t2 ) {
-  var st, S, E, I, R, H, steps, simulateValue 
+  let st, steps, del_t, pop, birthrate
   // transitions between classes
       steps = mathLib.numEulerSteps(t1, t2, dt)
       temp = [].concat(temp2)

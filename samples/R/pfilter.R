@@ -43,13 +43,14 @@ rproc <- Csnippet("
                   reulermultinom(2,E,&rate[2],dt,&trans[2]);
                   reulermultinom(2,I,&rate[4],dt,&trans[4]);
 
-//printf(\"%f %f %f %f %f %f %f\\n\", tt * 1000000000 ,trans[0], trans[1], trans[2], trans[3], trans[4], trans[5]);
-
+//printf(\"%f %f %f %f %f %f %f %f %f\\n\", birthrate, births, tt ,trans[0], trans[1], trans[2], trans[3], trans[4], trans[5]);
+//printf(\"%f %f %f %f %f \\n\", S ,E, I, R, H);
                   S += births - trans[0] - trans[1];
                   E += trans[0] - trans[2] - trans[3];
                   I += trans[2] - trans[4] - trans[5];
                   R = pop - S - E - I;
                   H += trans[4];           // true incidence
+//printf(\"%f %f %f %f %f \\n\\n\", S ,E, I, R, H);
                   "
                   )
 

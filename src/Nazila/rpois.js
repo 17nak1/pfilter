@@ -1,60 +1,60 @@
 
-var mathLib = require('./mathLib')
+let mathLib = require('./mathLib')
 
 rpois = {}
 
-var M_1_SQRT_2PI = 1 / Math.sqrt(2 * Math.PI)
-var a0 = -0.5;
-var a1 = 0.3333333;
-var a2 = -0.2500068;
-var a3 = 0.2000118;
-var a4 = -0.1661269;
-var a5 = 0.1421878;
-var a6 = -0.1384794;
-var a7 = 0.125006;
-var one_7 = 0.1428571428571428571;
-var one_12 = 0.0833333333333333333;
-var one_24 = 0.0416666666666666667;
+let M_1_SQRT_2PI = 1 / Math.sqrt(2 * Math.PI)
+let a0 = -0.5;
+let a1 = 0.3333333;
+let a2 = -0.2500068;
+let a3 = 0.2000118;
+let a4 = -0.1661269;
+let a5 = 0.1421878;
+let a6 = -0.1384794;
+let a7 = 0.125006;
+let one_7 = 0.1428571428571428571;
+let one_12 = 0.0833333333333333333;
+let one_24 = 0.0416666666666666667;
 
 rpois.rpoisOne = function (mu) {
-    var fact = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880];
-    var l = 0;
-    var m = 0;
-    var pp = new Array(36);
-    var b1 = 0;
-    var b2 = 0;
-    var c = 0;
-    var c0 = 0;
-    var c1 = 0;
-    var c2 = 0;
-    var c3 = 0;
-    var p0 = 0;
-    var p = 0;
-    var q = 0;
-    var s = 0;
-    var d = 0;
-    var omega = 0;
-    var big_l = 0;
-    var muprev = 0;
-    var muprev2 = 0;
-    var del;
-    var difmuk = 0;
-    var E = 0;
-    var fk = 0;
-    var fx;
-    var fy;
-    var g;
-    var px;
-    var py;
-    var t = 0;
-    var u = 0;
-    var v;
-    var x;
-    var pois = -1;
-    var k;
-    var kflag = 0;
-    var big_mu;
-    var new_big_mu = false;
+    let fact = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880];
+    let l = 0;
+    let m = 0;
+    let pp = new Array(36);
+    let b1 = 0;
+    let b2 = 0;
+    let c = 0;
+    let c0 = 0;
+    let c1 = 0;
+    let c2 = 0;
+    let c3 = 0;
+    let p0 = 0;
+    let p = 0;
+    let q = 0;
+    let s = 0;
+    let d = 0;
+    let omega = 0;
+    let big_l = 0;
+    let muprev = 0;
+    let muprev2 = 0;
+    let del;
+    let difmuk = 0;
+    let E = 0;
+    let fk = 0;
+    let fx;
+    let fy;
+    let g;
+    let px;
+    let py;
+    let t = 0;
+    let u = 0;
+    let v;
+    let x;
+    let pois = -1;
+    let k;
+    let kflag = 0;
+    let big_mu;
+    let new_big_mu = false;
     if (!isFinite(mu) || mu < 0) {
         throw "error"
     }
@@ -126,8 +126,8 @@ rpois.rpoisOne = function (mu) {
         c0 = 1 - b1 + 3 * b2 - 15 * c3;
         c = 0.1069 / mu;
     }
-    var gotoStepF = false;
-    var once = true;
+    let gotoStepF = false;
+    let once = true;
     while (true) {
         if (once) {
             once = false;

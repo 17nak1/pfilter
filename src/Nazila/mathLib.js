@@ -1,15 +1,15 @@
 
-var mathLib = {}
+let mathLib = {}
 
 
 let erf = require('math-erf')
 let rbinom = require('./rbinom')
-var libUnif = require('lib-r-math.js');
+let libUnif = require('lib-r-math.js');
 const {
     R: { numberPrecision },
     rng: { MersenneTwister, timeseed }
 } = libUnif
-var U = new MersenneTwister(0) 
+let U = new MersenneTwister(0) 
 
 mathLib.pnorm = function (x, mu = 0, sd = 1, lower_tail = true, give_log = false) {
   if (sd < 0) {
@@ -27,9 +27,9 @@ mathLib.pnorm = function (x, mu = 0, sd = 1, lower_tail = true, give_log = false
 
 
 mathLib.numEulerSteps = function(t1, t2, dt) {
-  var DOUBLE_EPS = 10e-8
-  var tol = Math.sqrt(DOUBLE_EPS)
-  var nstep
+  let DOUBLE_EPS = 10e-8
+  let tol = Math.sqrt(DOUBLE_EPS)
+  let nstep
   if (t1 >= t2) {
     dt = 0
     nstep = 0
@@ -44,9 +44,9 @@ mathLib.numEulerSteps = function(t1, t2, dt) {
 }
 
 mathLib.numMapSteps = function (t1, t2, dt) {
-  var DOUBLE_EPS = 10e-8
-  var tol = Math.sqrt(DOUBLE_EPS)
-  var nstep
+  let DOUBLE_EPS = 10e-8
+  let tol = Math.sqrt(DOUBLE_EPS)
+  let nstep
   // nstep will be the number of discrete-time steps to take in going from t1 to t2.
   nstep = Math.floor((t2 - t1) / dt /(1 + tol))
   return (nstep > 0) ? nstep : 0
@@ -59,8 +59,8 @@ mathLib.nosortResamp = function (nw, w, np, p, offset) {
   if (w[nw - 1] <= 0) {
     throw "in 'systematic_resampling': non-positive sum of weight"
   }
-  var du = w[nw - 1] / np
-  var u = -du * U.unif_rand()//Math.random()// U.unif_rand()
+  let du = w[nw - 1] / np
+  let u = -du * U.unif_rand()//Math.random()// U.unif_rand()
 
   for (j = 0, i = 0; j < np; j++) {
     u += du
@@ -74,8 +74,8 @@ mathLib.nosortResamp = function (nw, w, np, p, offset) {
 
 
 mathLib.reulermultinom = function (m = 1, size, rateAdd, dt, transAdd, rate, trans) {
-  var p = 0
-  var j, k
+  let p = 0
+  let j, k
   if ((size < 0) || (dt < 0) || (Math.floor(size + 0.5) !== size)) {
     for (k = 0; k < m; k++) trans[k + transAdd] = NaN
     return 0
@@ -108,7 +108,7 @@ mathLib.reulermultinom = function (m = 1, size, rateAdd, dt, transAdd, rate, tra
 }
 
 // mathLib.rpois = function (lambda = 1) {
-//   var k = 0; p = 1; l= Math.exp(-lambda)
+//   let k = 0; p = 1; l= Math.exp(-lambda)
 //   while (p > l) { 
 //     k += 1
 //     p = p * Math.random()
@@ -117,7 +117,7 @@ mathLib.reulermultinom = function (m = 1, size, rateAdd, dt, transAdd, rate, tra
 // }
 
 mathLib.interpolator = function (points) {
-  var first, n = points.length - 1,
+  let first, n = points.length - 1,
     interpolated,
     leftExtrapolated,
     rightExtrapolated;
@@ -140,7 +140,7 @@ mathLib.interpolator = function (points) {
   first = points[0]
 
   leftExtrapolated = function (x) {
-    var a = points[0], b = points[1];
+    let a = points[0], b = points[1];
     return a[1] + (x - a[0]) * (b[1] - a[1]) / (b[0] - a[0])
   }
 
@@ -149,12 +149,12 @@ mathLib.interpolator = function (points) {
   }
 
   rightExtrapolated = function (x) {
-    var a = points[n - 1], b = points[n];
+    let a = points[n - 1], b = points[n];
     return b[1] + (x - b[0]) * (b[1] - a[1]) / (b[0] - a[0])
   }
 
   return function (x) {
-    var i
+    let i
     if (x <= first[0]) {
       return leftExtrapolated(x)
     }
@@ -174,7 +174,7 @@ mathLib.sign = function (x, signal) {
 }
 
 mathLib.expRand = function (uniformRand) {
-    var q = [
+    let q = [
         0.6931471805599453,
         0.9333736875190459,
         0.9888777961838675,
@@ -192,8 +192,8 @@ mathLib.expRand = function (uniformRand) {
         0.9999999999999999,
         1.0000000000000000
     ];
-    var a = 0.;
-    var u = uniformRand();
+    let a = 0.;
+    let u = uniformRand();
     while (u <= 0. || u >= 1.)
         u = uniformRand();
     while (true) {
@@ -205,9 +205,9 @@ mathLib.expRand = function (uniformRand) {
     u -= 1.;
     if (u <= q[0])
       return a + u
-    var i = 0;
-    var ustar = uniformRand();
-    var umin = ustar;
+    let i = 0;
+    let ustar = uniformRand();
+    let umin = ustar;
     do {
         ustar = uniformRand();
         if (umin > ustar)
@@ -217,7 +217,7 @@ mathLib.expRand = function (uniformRand) {
     return a + umin * q[0];
 }
 mathLib.normalRand =function() {
-    var u = 0, v = 0;
+    let u = 0, v = 0;
     while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
     while(v === 0) v = Math.random();
     return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v )
