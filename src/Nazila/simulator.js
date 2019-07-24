@@ -1,28 +1,37 @@
 
+/**
+ *  @file     simulator.js
+ *            Transitions between classes in the time interval (t1, t2).
+ *            The function returns the new value of states at time t2 based on rprocess in modelSnippet.
+ *            The method is same as R code; euler with dt = 1/ 365.25
+ *  Inputs    Np : Nomber of points
+ *            temp1 : State's values at time t1
+ *            temp : State's values at time t2
+ */
+
 let mathLib = require('./mathLib.js')
 let snippet = require('./modelSnippet.js')
 
 let simulator = {}
-simulator.simulate = function (Np, temp2, dt, interpolPop, interpolBirth, params, t1,t2 ) {
-  let st, steps, del_t, pop, birthrate
-  // transitions between classes
-      steps = mathLib.numEulerSteps(t1, t2, dt)
-      temp = [].concat(temp2)
-      del_t = (t2 - t1) / steps
-    st = t1
-    for (let stp = 0; stp < steps; stp++) { // steps in each time interval
-      
-      pop = interpolPop(st)
-      birthrate = interpolBirth(st)
-      for (let np = 0; np < Np; np++){ //calc for each particle
-        temp[np] = simulateValue = snippet.rprocess(params, st, del_t, temp[np], pop, birthrate)
-      }
-      st += del_t
-      if (stp == steps - 2) { // penultimate step
-        del_t = t2 - st;
-        st =  t2 - del_t;
-      }
+simulator.simulate = function (Np, temp1, dt, interpolPop, interpolBirth, params, t1, t2 ) {
+  let currentTime, steps, del_t, pop, birthrate
+  
+  steps = mathLib.numEulerSteps(t1, t2, dt) // Total number of steps in the interval (t1, t2)
+  temp = [].concat(temp1)
+  del_t = (t2 - t1) / steps
+  currentTime = t1
+  for (let i = 0; i < steps; i++) { // steps in each time interval
+    pop = interpolPop(currentTime)
+    birthrate = interpolBirth(currentTime)
+    for (let np = 0; np < Np; np++){ //calc for each particle
+      temp[np] = snippet.rprocess(params, currentTime, del_t, temp[np], pop, birthrate)
     }
+    currentTime += del_t
+    if (i == steps - 2) { // penultimate step
+      del_t = t2 - currentTime;
+      currentTime =  t2 - del_t;
+    }
+  }
   return temp
 }
 

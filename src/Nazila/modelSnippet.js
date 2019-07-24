@@ -1,17 +1,20 @@
 
 snippet = {}
 let mathLib = require('./mathLib')
-//let rpois = require('./rpois')
+let rpois = require('./rpois')
+
 //* Set the seed for rnorm-In R:RNGkind("L'Ecuyer-CMRG", normal.kind="Box-Muller");set.seed(1234) 
-const libR = require('lib-r-math.js')
-const {
-  Poisson,
-  rng: { MersenneTwister },
-  rng: { normal: { Inversion } }
-} = libR
-const mt = new MersenneTwister(0)// 
-const { rpois } = Poisson(new Inversion(mt))
-mt.init(1234)
+// const libR = require('lib-r-math.js')
+// const {
+//   Poisson,
+//   rng: { MersenneTwister },
+//   rng: { normal: { Inversion } }
+// } = libR
+// const mt = new MersenneTwister(0)// 
+// const { rpois } = Poisson(new Inversion(mt))
+// mt.init(1234)
+// console.log(rpois(1,2))
+
 snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   let seas, beta, beta0, foi, R0, tt, va
   let trans = new Array(6).fill(0)
@@ -29,16 +32,16 @@ snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   } else {
     seas = 1 - amplitude
   }                 
-  beta = R0 * (gamma + mu) * (sigma + mu) * seas / sigma //seasonal transmission rate
+  beta = R0 * (gamma + mu) * (sigma + mu) * seas / sigma  //seasonal transmission rate
   foi = beta * I / pop
-  rate[0] = foi//force of infection
-  rate[1] = mu// natural S death
-  rate[2] = sigma// rate of ending of latent stage
-  rate[3] = mu// natural E death
-  rate[4] = gamma// recovery
-  rate[5] = mu// natural I death 
+  rate[0] = foi            //force of infection
+  rate[1] = mu             // natural S death
+  rate[2] = sigma          // rate of ending of latent stage
+  rate[3] = mu             // natural E death
+  rate[4] = gamma          // recovery
+  rate[5] = mu             // natural I death 
    
-  let births = rpois(1,birthrate * (1 - va) * del_t )// Poisson births
+  let births = rpois.rpoisOne(birthrate * (1 - va) * del_t )// Poisson births
   mathLib.reulermultinom(2, Math.round(S), 0, del_t, 0, rate, trans)
   mathLib.reulermultinom(2, Math.round(E), 2, del_t, 2, rate, trans)
   mathLib.reulermultinom(2, Math.round(I), 4, del_t, 4, rate, trans)

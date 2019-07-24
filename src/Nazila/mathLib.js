@@ -60,7 +60,7 @@ mathLib.nosortResamp = function (nw, w, np, p, offset) {
     throw "in 'systematic_resampling': non-positive sum of weight"
   }
   let du = w[nw - 1] / np
-  let u = -du * U.unif_rand()//Math.random()// U.unif_rand()
+  let u = -du * U.unif_rand()//Math.random()
 
   for (j = 0, i = 0; j < np; j++) {
     u += du
@@ -106,15 +106,6 @@ mathLib.reulermultinom = function (m = 1, size, rateAdd, dt, transAdd, rate, tra
     for (k = 0; k < m; k++) trans[k + transAdd] = 0
   }
 }
-
-// mathLib.rpois = function (lambda = 1) {
-//   let k = 0; p = 1; l= Math.exp(-lambda)
-//   while (p > l) { 
-//     k += 1
-//     p = p * Math.random()
-//   }
-//   return k-1
-// }
 
 mathLib.interpolator = function (points) {
   let first, n = points.length - 1,

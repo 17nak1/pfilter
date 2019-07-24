@@ -227,7 +227,7 @@ rbinom.R_pow_di = function (x, n) {
         while (true) {
             if (n & 1)
                 pow *= x;
-            if ((n >>>= 1))
+            if ((n >>= 1))
                 x *= x;
             else
                 break;
