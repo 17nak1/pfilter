@@ -4,7 +4,7 @@
  *                    Random number generator using the poisson distribution.    
  *                         
  *  @references       Jacob K.F. Bogers, info@mail.jacob-bogers.com
- *                    https://github.com/R-js/libRmath.js/blob/master/src/lib/binomial/rbinom.ts
+ *                    https://github.com/R-js/libRmath.js/blob/master/src/lib/poisson/rpois.ts
  *
  *  @autor            Nazila Akhavan, nazila@kingsds.network
  *  @date             March 2019
