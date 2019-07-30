@@ -1,4 +1,15 @@
 
+/**
+ *  @file             rpois.js   
+ *                    Random number generator using the poisson distribution.    
+ *                         
+ *  @references       Jacob K.F. Bogers, info@mail.jacob-bogers.com
+ *                    https://github.com/R-js/libRmath.js/blob/master/src/lib/binomial/rbinom.ts
+ *
+ *  @autor            Nazila Akhavan, nazila@kingsds.network
+ *  @date             March 2019
+ */
+
 let mathLib = require('./mathLib')
 
 rpois = {}
@@ -196,4 +207,4 @@ rpois.rpoisOne = function (mu) {
 }
 
 module.exports = rpois;
-// console.log(rpois.rpoisOne(10))
+
