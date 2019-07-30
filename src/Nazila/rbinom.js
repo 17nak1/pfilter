@@ -1,11 +1,13 @@
-/*
- * file        rbinom.js     Random variates from the binomial distribution.
+/**
+ *  @file             rbinom.js   
+ *                    Random number generator using the binomial distribution.    
  *                         
- * References                Jacob K.F. Bogers  info@mail.jacob-bogers.com
- *                           https://github.com/R-js/libRmath.js/blob/master/src/lib/binomial/rbinom.ts
+ *  @references       Jacob K.F. Bogers, info@mail.jacob-bogers.com
+ *                    https://github.com/R-js/libRmath.js/blob/master/src/lib/binomial/rbinom.ts
+ *
+ *  @date             March 2019
  */
-// let rng = require('./rng.js')
-// rndamir.init(1234)
+
 rbinom = {}
 
 rbinom. rbinomOne = function (size, pp) {
@@ -235,8 +237,5 @@ rbinom.R_pow_di = function (x, n) {
     }
     return pow;
 }
-// rbinom.random = function () {
-//     return rng.genrand_real3()//0.000002//Math.random()
-// }
+
 module.exports = rbinom
-// console.log(rng.genrand_real3())
