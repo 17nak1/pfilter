@@ -1,19 +1,21 @@
 
 /**
- *  @file     simulator.js
- *            Transitions between classes in the time interval (t1, t2).
- *            The function returns the new value of states at time t2 based on rprocess in modelSnippet.
- *            The method is same as R code; euler with dt = 1/ 365.25
- *  Inputs    Np : Nomber of points
- *            temp1 : State's values at time t1
- *            temp : State's values at time t2
+ *  @file        simulator.js
+ *               Transitions between classes in the time interval (t1, t2).
+ *               The function returns the new value of states at time t2 based on rprocess in modelSnippet.
+ *
+ *  Inputs       Np : Nomber of points
+ *               temp1 : State's values at time t1
+ *               temp : State's values at time t2
+ *
+ *  @autor       Nazila Akhavan, nazila@kingsds.network
+ *  @date        March 2019
  */
 
 let mathLib = require('./mathLib.js')
 let snippet = require('./modelSnippet.js')
 
-let simulator = {}
-simulator.simulate = function (Np, temp1, dt, interpolPop, interpolBirth, params, t1, t2 ) {
+exports.simulate = function (Np, temp1, dt, interpolPop, interpolBirth, params, t1, t2 ) {
   let currentTime, steps, del_t, pop, birthrate
   
   steps = mathLib.numEulerSteps(t1, t2, dt) // Total number of steps in the interval (t1, t2)
@@ -34,5 +36,3 @@ simulator.simulate = function (Np, temp1, dt, interpolPop, interpolBirth, params
   }
   return temp
 }
-
-module.exports = simulator
