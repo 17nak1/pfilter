@@ -1,4 +1,5 @@
-cureentfolder <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
+setwd(getwd())
+library(pomp)
 start_time <- Sys.time()
 
 
@@ -7,34 +8,32 @@ rproc <- Csnippet("
                   double seas, beta, foi;
                   double births, va, tt;
                   double rate[6], trans[6];
-
-
+                  
+                  
                   va = 0;
-
-
+                  
+                  
                   // term-time seasonality
                   tt = (t-floor(t))*365.25;
                   if ((tt>=7&&tt<=100) || (tt>=115&&tt<=199) || (tt>=252&&tt<=300) || (tt>=308&&tt<=356))
                   seas = 1.0+amplitude*0.2411/0.7589;
                   else
                   seas = 1.0-amplitude;
-
+                  
                   // transmission rate
                   beta = R0*(gamma+mu)*(sigma+mu)*seas/sigma;  //seasonal transmission rate
                   // expected force of infection
                   foi = beta*I/pop;
-
+                  
                   rate[0] = foi;  //         force of infection
                   rate[1] = mu;             // natural S death
                   rate[2] = sigma;        // rate of ending of latent stage
                   rate[3] = mu;             // natural E death
                   rate[4] = gamma;        // recovery
                   rate[5] = mu;             // natural I death
-
-//printf(\"%f %f %f %f %f %f %f %f %f %f\\n\", R0, amplitude, gamma, mu, sigma, beta, foi, va, tt, seas);
-
-                  //if( t>= 1964.9)
-                  //printf(\"%f birthrate %f pop %f\\n\", t, birthrate, pop);
+                  
+                  //if( t>= 1934.9 && t< 1944.1)
+                  //printf(\"%f  %f\\n\", t, pop);
                   // Poisson births
                   births = rpois(birthrate*(1-va)*dt);
                   //printf(\" %f, %f \\n\", t, births);
@@ -42,15 +41,11 @@ rproc <- Csnippet("
                   reulermultinom(2,S,&rate[0],dt,&trans[0]);
                   reulermultinom(2,E,&rate[2],dt,&trans[2]);
                   reulermultinom(2,I,&rate[4],dt,&trans[4]);
-
-//printf(\"%f %f %f %f %f %f %f %f %f\\n\", birthrate, births, tt ,trans[0], trans[1], trans[2], trans[3], trans[4], trans[5]);
-//printf(\"%f %f %f %f %f \\n\", S ,E, I, R, H);
                   S += births - trans[0] - trans[1];
                   E += trans[0] - trans[2] - trans[3];
                   I += trans[2] - trans[4] - trans[5];
                   R = pop - S - E - I;
                   H += trans[4];           // true incidence
-//printf(\"%f %f %f %f %f \\n\\n\", S ,E, I, R, H);
                   "
                   )
 
@@ -66,12 +61,10 @@ initz <- Csnippet("
                   ")
 # Sampling from the normal approximation of the binomial distribution
 dmeas <- Csnippet("
-
                   double m = rho*H;
                   double v = m*(1.0-rho+psi*psi*m);
                   double tol = 1.0e-18;
                   if (R_FINITE(cases)) {
-//printf(\" %f %lf \\n\", H, cases);
                   if (cases > 0.0) {
                   lik = pnorm(cases+0.5,m,sqrt(v)+tol,1,0)-pnorm(cases-0.5,m,sqrt(v)+tol,1,0)+tol;
                   } else {
@@ -83,7 +76,7 @@ dmeas <- Csnippet("
                   }
                   ")
 rmeas <- Csnippet("
-
+                  
                   double m = rho*H;
                   double v = m*(1.0-rho+psi*psi*m);
                   double tol = 1.0e-18;
@@ -129,7 +122,7 @@ statenames <- c("S","E","I","R","H")
 zeronames <- c("H")
 #########################################            data
 cureentfolder <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
-London_BiData <- read.csv(file.path(cureentfolder, "London_BiData.csv"))
+London_BiData <- read.csv(file.path(cureentfolder, "London_BiDataMain.csv"))
 London_covar <- read.csv(file.path(cureentfolder, "London_covar.csv"))
 #########################################       make pomp
 pomp(
@@ -154,35 +147,24 @@ current_params= c(R0=3.132490e+01 , amplitude=3.883620e-01 , gamma=7.305000e+01 
 # pfilter(m1,params=current_params,Np=500) -> ss
 # ss ye clasee ke toosh matrix hate mokhtalef dare. Mitooni spred.mean ro baraye moghayese estefade koni ke ye matrix 5* (toole baze zaman)
 # hast. satre aval "S" ro mitooni ba in dastoor bebini.
-
-setwd(cureentfolder)
+np = 70000
+setwd("/home/nazila/Git/pfilter/samples")
+# setwd("~/Downloads/pfilter/samples")
 tstart = 1
-
-datasetj <- as.data.frame(read.csv('predmean.csv'))
-condLoglik <- as.data.frame(read.csv('condLoglik.csv'))
-
-tend = dim(datasetj)[1]
-pfilter(m1,params=current_params,Np=1000,filter.mean = T,pred.mean=T, max.fail=500) -> ss
-datapredict <- as.data.frame(ss@pred.mean)
-pmS=c();pmE=c();pmR=c();pmI=c();pmH=c();pmlik=c();for(i in tstart:tend){pmS[i]=datapredict[1,i];pmE[i]=datapredict[2,i];pmR[i]=datapredict[3,i];pmI[i]=datapredict[4,i];pmH[i]=datapredict[5,i];}
-
-par(mfrow=c(2,3))
-plot(datasetj$S[c(tstart:tend)], type ="l",main="S",col = "red", ylab = "JS")
-points(pmS[c(tstart:tend)], type ="l")
-plot(datasetj$E[c(tstart:tend)], type ="l",main="E",col = "red", ylab = "JS")
-points(pmE[c(tstart:tend)], type ="l")
-plot(datasetj$R[c(tstart:tend)], type ="l",main="R",col = "red", ylab = "JS")
-points(pmI[c(tstart:tend)], type ="l")
-plot(datasetj$I[c(tstart:tend)], type ="l",main="I",col = "red", ylab = "JS")
-points(pmR[c(tstart:tend)], type ="l")
-plot(datasetj$H[c(tstart:tend)], type ="l",main="H",col = "red", ylab = "JS")
-points(pmH[c(tstart:tend)], type ="l")
-plot(condLoglik$lik[c(tstart:tend)], type ="l",main="lik",col = "red", ylab = "JS")
-points(ss$cond.loglik[c(tstart:tend)], type ="l")
-
-write.csv(datapredict, file.path(cureentfolder, "predmeanr.csv"))
-write.csv(ss$cond.loglik, file.path(cureentfolder, "condLoglikr.csv"))
-
+tend = 500
+datasetj <- as.data.frame(read.csv("predmean1.csv"))
+start_time <- Sys.time()
+pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
 end_time <- Sys.time()
 end_time - start_time
-ss@loglik
+
+
+datapredict <- as.data.frame(ss@pred.mean)
+pm=c();for(i in tstart:tend){pm[i]=datapredict[1,i]}
+# pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
+# datapredict2 <- as.data.frame(ss@pred.mean)
+# pm2=c();for(i in tstart:tend){pm2[i]=datapredict2[1,i]}
+plot(datasetj$S[c(tstart :tend)], type ="l",main= np,col = "red", ylab = "JS")
+# plot(pm2[c(tstart :tend)], type ="l", col="red")
+points(pm[c(tstart :tend)], type ="l")
+

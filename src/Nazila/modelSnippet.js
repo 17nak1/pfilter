@@ -1,19 +1,14 @@
+/**
+ *  @file        modeSnippet.js
+ *               Makes the model and its dependencies.
+ *                 
+ *  @autor       Nazila Akhavan, nazila@kingsds.network
+ *  @date        Feb 2019
+ */
 
 snippet = {}
 let mathLib = require('./mathLib')
 let rpois = require('./rpois')
-
-//* Set the seed for rnorm-In R:RNGkind("L'Ecuyer-CMRG", normal.kind="Box-Muller");set.seed(1234) 
-// const libR = require('lib-r-math.js')
-// const {
-//   Poisson,
-//   rng: { MersenneTwister },
-//   rng: { normal: { Inversion } }
-// } = libR
-// const mt = new MersenneTwister(0)// 
-// const { rpois } = Poisson(new Inversion(mt))
-// mt.init(1234)
-// console.log(rpois(1,2))
 
 snippet.rprocess = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   let seas, beta, beta0, foi, R0, tt, va

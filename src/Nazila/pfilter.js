@@ -1,3 +1,13 @@
+
+/**
+ *  @file        pfilter.js
+ *               A plain vanilla sequential Monte Carlo (particle filter) algorithm.
+ *               Resampling is performed at each observation.
+ *               
+ *  @autor       Nazila Akhavan, nazila@kingsds.network
+ *  @date        March 2019
+ */
+
 let fmin = require ('fmin')
 let mathLib = require('./mathLib')
 let snippet = require('./modelSnippet.js')
@@ -9,7 +19,6 @@ let pfilter = {}
 pfilter.predictionMean = []
 pfilter.predictionVariance = []
 
-//////////////////////////////////////////data///////////////////////////////////////
 pfilter.run = function(input){
 
   let defaults = {params:-1, Np:-1, toler:1e-17, maxFail:Infinity, runPredMean:0, runPredVar:0, runFilterMean:0, runSaveStates:0, timeZero:-1, dt:-1,
@@ -41,6 +50,7 @@ pfilter.run = function(input){
     d1.push([Number(dataCovar[i][0]), Number(dataCovar[i][1])])
     d2.push([Number(dataCovar[i][0]), Number(dataCovar[i][2])])
   }
+
   // Define variables
   let interpolPop = mathLib.interpolator (d1)
   let interpolBirth = mathLib.interpolator (d2)
@@ -83,7 +93,7 @@ pfilter.run = function(input){
 
   /**
    *  Time loops
-   *  The first loop aimulating from t0 to first time value in reported data.
+   *  The first loop simulating from t0 to first time value in reported data.
    *  The second one is based on times in reported data and calculates weights.  
    *  Starting at time t_n we have results at time t_{n+1}. But in the second loop k2 use the 
    *  results from the first loop which is in tdata and start calculing up to timeLen.
@@ -136,11 +146,11 @@ pfilter.run = function(input){
       }
       
       if (allFail) {
-        lik = Math.log(toler) // minimum log-likelihood
-        ess = 0  // zero effective sample size
+        lik = Math.log(toler)           // minimum log-likelihood
+        ess = 0                         // zero effective sample size
       } else {
-        ess = w * w / ws  // effective sample size
-        lik = Math.log(w / Np)// mean of weights is likelihood
+        ess = w * w / ws               // effective sample size
+        lik = Math.log(w / Np)         // mean of weights is likelihood
       }
       condLoglik[timeCountData] = [timeCountData + 1, lik]
       // the total conditional logliklihood in the time process is loglik
@@ -176,15 +186,15 @@ pfilter.run = function(input){
         }
         //  compute filter mean
         if (runFilterMean) {
-          if (allFail) {   // unweighted average
+          if (allFail) { //  unweighted average
             ws = 0
             for (let nrow =0; nrow < Np; nrow++){
               if (particles[nrow][j]) {
                 ws += particles[nrow][j]
               }
             } 
-            filterMean[timeCountData][j] = ws / Np//;console.log(ws / Np)
-          } else {      // weighted average
+            filterMean[timeCountData][j] = ws / Np
+          } else { //  weighted average
             ws = 0
             for (let nrow =0; nrow < Np; nrow++){
               if (particles[nrow][j]) {
@@ -212,7 +222,7 @@ pfilter.run = function(input){
 
       k = k2
   }//endTime
-///////////////////////////////////////////////////
+
 pfilter.predictionMean = predictionMean
 console.log(loglik)
   let createCsvWriter = require('csv-writer').createArrayCsvWriter;

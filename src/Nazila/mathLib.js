@@ -1,6 +1,13 @@
 
-let mathLib = {}
+/**
+ *  @file        MathLib.js
+ *               Library of depentent functions  
+ *
+ *  @autor       Nazila Akhavan, nazila@kingsds.network
+ *  @date        March 2019
+ */
 
+let mathLib = {}
 
 let erf = require('math-erf')
 let rbinom = require('./rbinom')
@@ -11,6 +18,7 @@ const {
 } = libUnif
 let U = new MersenneTwister(0) 
 
+// Normal  distribution function
 mathLib.pnorm = function (x, mu = 0, sd = 1, lower_tail = true, give_log = false) {
   if (sd < 0) {
     return NaN
@@ -52,6 +60,7 @@ mathLib.numMapSteps = function (t1, t2, dt) {
   return (nstep > 0) ? nstep : 0
 }
 
+// Resampling function
 mathLib.nosortResamp = function (nw, w, np, p, offset) {
   for (j = 1; j < nw; j++) {
    w[j] += w[j-1]
@@ -72,7 +81,7 @@ mathLib.nosortResamp = function (nw, w, np, p, offset) {
   }
 }
 
-
+// The Euler-multinomial distributions
 mathLib.reulermultinom = function (m = 1, size, rateAdd, dt, transAdd, rate, trans) {
   let p = 0
   let j, k
@@ -164,6 +173,7 @@ mathLib.sign = function (x, signal) {
   return signal ? Math.abs(x) : -Math.abs(x);
 }
 
+
 mathLib.expRand = function (uniformRand) {
     let q = [
         0.6931471805599453,
@@ -207,6 +217,7 @@ mathLib.expRand = function (uniformRand) {
     } while (u > q[i]);
     return a + umin * q[0];
 }
+// Normal RNG
 mathLib.normalRand =function() {
     let u = 0, v = 0;
     while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)

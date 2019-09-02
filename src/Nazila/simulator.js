@@ -36,3 +36,5 @@ exports.simulate = function (Np, temp1, dt, interpolPop, interpolBirth, params, 
   }
   return temp
 }
+
+
