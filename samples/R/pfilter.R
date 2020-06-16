@@ -1,5 +1,5 @@
 setwd(getwd())
-library(pomp)
+# library(pomp)
 start_time <- Sys.time()
 
 
@@ -8,30 +8,30 @@ rproc <- Csnippet("
                   double seas, beta, foi;
                   double births, va, tt;
                   double rate[6], trans[6];
-                  
-                  
+
+
                   va = 0;
-                  
-                  
+
+
                   // term-time seasonality
                   tt = (t-floor(t))*365.25;
                   if ((tt>=7&&tt<=100) || (tt>=115&&tt<=199) || (tt>=252&&tt<=300) || (tt>=308&&tt<=356))
                   seas = 1.0+amplitude*0.2411/0.7589;
                   else
                   seas = 1.0-amplitude;
-                  
+
                   // transmission rate
                   beta = R0*(gamma+mu)*(sigma+mu)*seas/sigma;  //seasonal transmission rate
                   // expected force of infection
                   foi = beta*I/pop;
-                  
+
                   rate[0] = foi;  //         force of infection
                   rate[1] = mu;             // natural S death
                   rate[2] = sigma;        // rate of ending of latent stage
                   rate[3] = mu;             // natural E death
                   rate[4] = gamma;        // recovery
                   rate[5] = mu;             // natural I death
-                  
+
                   //if( t>= 1934.9 && t< 1944.1)
                   //printf(\"%f  %f\\n\", t, pop);
                   // Poisson births
@@ -76,7 +76,7 @@ dmeas <- Csnippet("
                   }
                   ")
 rmeas <- Csnippet("
-                  
+
                   double m = rho*H;
                   double v = m*(1.0-rho+psi*psi*m);
                   double tol = 1.0e-18;
@@ -147,12 +147,12 @@ current_params= c(R0=3.132490e+01 , amplitude=3.883620e-01 , gamma=7.305000e+01 
 # pfilter(m1,params=current_params,Np=500) -> ss
 # ss ye clasee ke toosh matrix hate mokhtalef dare. Mitooni spred.mean ro baraye moghayese estefade koni ke ye matrix 5* (toole baze zaman)
 # hast. satre aval "S" ro mitooni ba in dastoor bebini.
-np = 70000
-setwd("/home/nazila/Git/pfilter/samples")
-# setwd("~/Downloads/pfilter/samples")
+np = 10000
+setwd("~/Git/pfilter/samples")
+
 tstart = 1
 tend = 500
-datasetj <- as.data.frame(read.csv("predmean1.csv"))
+datasetj <- as.data.frame(read.csv("~/Gitlab/dcp-r/pfilter-0.1/samples/predmean.csv"))
 start_time <- Sys.time()
 pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
 end_time <- Sys.time()
@@ -161,10 +161,11 @@ end_time - start_time
 
 datapredict <- as.data.frame(ss@pred.mean)
 pm=c();for(i in tstart:tend){pm[i]=datapredict[1,i]}
-# pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
-# datapredict2 <- as.data.frame(ss@pred.mean)
-# pm2=c();for(i in tstart:tend){pm2[i]=datapredict2[1,i]}
+pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
+datapredict2 <- as.data.frame(ss@pred.mean)
+pm2=c();for(i in tstart:tend){pm2[i]=datapredict2[1,i]}
 plot(datasetj$S[c(tstart :tend)], type ="l",main= np,col = "red", ylab = "JS")
-# plot(pm2[c(tstart :tend)], type ="l", col="red")
+points(pm[c(tstart :tend)], type ="l")
+plot(pm2[c(tstart :tend)], type ="l", col="blue", ylab = "R")
 points(pm[c(tstart :tend)], type ="l")
 
