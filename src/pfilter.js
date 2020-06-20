@@ -224,34 +224,45 @@ pfilter.run = function(input){
   }//endTime
 
 pfilter.predictionMean = predictionMean
+console.log(input.tempi)
 console.log(loglik)
+  
   let createCsvWriter = require('csv-writer').createArrayCsvWriter;
-
   let csvWriter = createCsvWriter({
-    header: ['S', 'E', 'I', 'R', 'H'],
-    path: rootDir + '/samples/predmean.csv'
-  })  
-  csvWriter.writeRecords(predictionMean)
-    .then(() => {
-    console.log('...predictionMean')
+    header: ['i', 'loglik', 'running time'],
+    path: rootDir + '/samples/loglik.csv',
+    append : true
+  })
+  csvWriter.writeRecords( [[input.tempi,  loglik, (new Date() - START) /1000]])
+  .then(() => {
+  console.log('...loglik '+input.tempi)
   })
 
   csvWriter = createCsvWriter({
     header: ['S', 'E', 'I', 'R', 'H'],
-    path: rootDir + '/samples/predvar.csv'
+    path: rootDir + '/samples/Result/predmean'+input.tempi+'.csv'
+  })  
+  csvWriter.writeRecords(predictionMean)
+    .then(() => {
+    console.log('...predictionMean '+input.tempi)
+  })
+
+  csvWriter = createCsvWriter({
+    header: ['S', 'E', 'I', 'R', 'H'],
+    path: rootDir + '/samples/Result/predvar'+input.tempi+'.csv'
   })  
   csvWriter.writeRecords(predictionVariance)
     .then(() => {
-    console.log('...predictionvar')
+    console.log('...predictionvar '+input.tempi)
   })
 
   csvWriter = createCsvWriter({
     header: ['lik'],
-    path: rootDir + '/samples/condLoglik.csv'
+    path: rootDir + '/samples/Result/condLoglik'+input.tempi+'.csv'
   })  
   csvWriter.writeRecords(condLoglik)
     .then(() => {
-    console.log('...condLoglik')
+    console.log('...condLoglik '+input.tempi)
   })
       
   console.log('running time:',(new Date() - START) /1000)

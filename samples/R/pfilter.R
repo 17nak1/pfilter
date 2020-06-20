@@ -122,7 +122,7 @@ statenames <- c("S","E","I","R","H")
 zeronames <- c("H")
 #########################################            data
 cureentfolder <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
-London_BiData <- read.csv(file.path(cureentfolder, "London_BiDataMainsh.csv"))
+London_BiData <- read.csv(file.path(cureentfolder, "London_BiDataMain.csv"))
 London_covar <- read.csv(file.path(cureentfolder, "London_covar.csv"))
 #########################################       make pomp
 pomp(
@@ -150,21 +150,31 @@ current_params= c(R0=3.132490e+01 , amplitude=3.883620e-01 , gamma=7.305000e+01 
 np = 20000
 
 tstart = 1
-tend = 50
-datasetj <- as.data.frame(read.csv(file.path(cureentfolder, "predmean.csv")))
+tend = 500
+#datasetj <- as.data.frame(read.csv(file.path(cureentfolder, "predmean.csv")))
 start_time <- Sys.time()
 pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
 end_time <- Sys.time()
-end_time - start_time
+calltime <- end_time - start_time
 
 
 datapredict <- as.data.frame(ss@pred.mean)
-pm=c();for(i in tstart:tend){pm[i]=datapredict[1,i]}
-pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
-datapredict2 <- as.data.frame(ss@pred.mean)
-pm2=c();for(i in tstart:tend){pm2[i]=datapredict2[1,i]}
-plot(datasetj$S[c(tstart :tend)], type ="l",main= np,col = "red", ylab = "JS")
-points(pm[c(tstart :tend)], type ="l")
-plot(pm2[c(tstart :tend)], type ="l", col="blue", ylab = "R")
-points(pm[c(tstart :tend)], type ="l")
+write.csv(datapredict,file.path(cureentfolder, "pred20.csv"))
+xrun <- data.frame('20', ss@loglik, calltime)
+write.csv(xrun,file.path(cureentfolder, "res20.csv"))
+
+#pm=c();for(i in tstart:tend){pm[i]=datapredict[1,i]}
+#pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
+#datapredict2 <- as.data.frame(ss@pred.mean)
+#pm2=c();for(i in tstart:tend){pm2[i]=datapredict2[1,i]}
+#plot(datasetj$S[c(tstart :tend)], type ="l",main= np,col = "red", ylab = "JS")
+#points(pm[c(tstart :tend)], type ="l")
+#plot(pm2[c(tstart :tend)], type ="l", col="blue", ylab = "R")
+#points(pm[c(tstart :tend)], type ="l")
+
+#ll <- c()
+#for(i in 1:10) {
+#  pfilter(m1,params=current_params,Np=np,filter.mean = T,pred.mean=T, max.fail=3000) -> ss; ss@loglik
+#  ll[i] <- ss@loglik
+#}
 
