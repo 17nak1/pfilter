@@ -40,14 +40,14 @@ rproc = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   H += trans[4] 
   return [S, E, I, R, H]
 };
-initz = function(pop, S_0, E_0, I_0, R_0) {
-  let m = pop / (S_0 + E_0 + R_0 + I_0),
-    S = Math.round(m * S_0),
-    E = Math.round(m * E_0),
-    I = Math.round(m * I_0),
-    R = Math.round(m * R_0),
+initz = function(input) {
+  let m = input.covar.pop / (input.params.S_0 + input.params.E_0 + input.params.R_0 + input.params.I_0),
+    S = Math.round(m * input.params.S_0),
+    E = Math.round(m * input.params.E_0),
+    I = Math.round(m * input.params.I_0),
+    R = Math.round(m * input.params.R_0),
     H = 0
-  return [S, E, I, R, H]
+  return {S, E, I, R, H}
 };
 dmeas = function (rho, psi, H, dCases, giveLog = 1) {
   let lik
@@ -108,7 +108,7 @@ if (London_BiData[London_BiData.length - 1].length === 1 ) {
   London_BiData.pop()
 }
 
-pomptest({
+let m1 = new pomptest({
   data: London_BiData,
   times:"time",
   t0: 1940,
@@ -129,6 +129,7 @@ current_params= {R0: 3.132490e+01 , amplitude: 3.883620e-01 , gamma: 7.305000e+0
 np= 20;
 
 ss = pomptest.pfilter({
+  object: m1,
   params: current_params,
   Np: np,
   filter_mean: true,
