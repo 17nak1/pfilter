@@ -1,5 +1,6 @@
 let interpolatorFactory = require('./mathlib/interpolatorFactory')
 let simulator = require('./simulator')
+let nosortResamp = require('./mathlib/nosortResamp')
 Pomp = function(input) {
     if(input == undefined){
         input = {};
@@ -50,6 +51,7 @@ Pomp = function(input) {
 
     this.interpolator = interpolatorFactory(this.covarnames, this.tcovar, this.covar);
     this.simulator = simulator;
+    this.nosortResamp = nosortResamp;
 
 }
 

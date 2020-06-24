@@ -147,7 +147,7 @@ current_params= c(R0=3.132490e+01 , amplitude=3.883620e-01 , gamma=7.305000e+01 
 # pfilter(m1,params=current_params,Np=500) -> ss
 # ss ye clasee ke toosh matrix hate mokhtalef dare. Mitooni spred.mean ro baraye moghayese estefade koni ke ye matrix 5* (toole baze zaman)
 # hast. satre aval "S" ro mitooni ba in dastoor bebini.
-np = 20
+np = 20000
 
 tstart = 1
 tend = 500

@@ -120,61 +120,61 @@ let pfilter = function(input){
       loglik += lik
       
       // Compute outputs
-      for (let j = 0; j< nvars; j++) {
-        // compute prediction mean
-        if (doPredictionMean || doPredictionVariance) {
-          sum = 0
-          nlost = 0
-          for (let nrow =0; nrow < Np; nrow++){
-            if (particles[nrow][j]) {
-              sum += particles[nrow][j]
-            } else {
-              nlost++
-            }
-          }
-          sum /= Np
-          predictionMean[timeCountData][j] = sum
-        }  
-        // compute prediction variance
-        if (doPredictionVariance) {
-          sumsq = 0
-          for (let nrow = 0; nrow < Np; nrow++){
+    //   for (let j = 0; j< nvars; j++) {
+    //     // compute prediction mean
+    //     if (doPredictionMean || doPredictionVariance) {
+    //       sum = 0
+    //       nlost = 0
+    //       for (let nrow =0; nrow < Np; nrow++){
+    //         if (particles[nrow][j]) {
+    //           sum += particles[nrow][j]
+    //         } else {
+    //           nlost++
+    //         }
+    //       }
+    //       sum /= Np
+    //       predictionMean[timeCountData][j] = sum
+    //     }  
+    //     // compute prediction variance
+    //     if (doPredictionVariance) {
+    //       sumsq = 0
+    //       for (let nrow = 0; nrow < Np; nrow++){
 
-            if (particles[nrow][j]) {
-              vsq = particles[nrow][j] - sum
-              sumsq += Math.pow(vsq, 2)
-            }
-          }
-          predictionVariance[timeCountData][j] = sumsq / (Np - 1) 
-        }
-        //  compute filter mean
-        if (runFilterMean) {
-          if (allFail) { //  unweighted average
-            ws = 0
-            for (let nrow =0; nrow < Np; nrow++){
-              if (particles[nrow][j]) {
-                ws += particles[nrow][j]
-              }
-            } 
-            filterMean[timeCountData][j] = ws / Np
-          } else { //  weighted average
-            ws = 0
-            for (let nrow =0; nrow < Np; nrow++){
-              if (particles[nrow][j]) {
-                ws += particles[nrow][j] * weights[nrow]
-              }
-            }
-            filterMean[timeCountData][j] = ws / w
-          }
-        }
-      }
+    //         if (particles[nrow][j]) {
+    //           vsq = particles[nrow][j] - sum
+    //           sumsq += Math.pow(vsq, 2)
+    //         }
+    //       }
+    //       predictionVariance[timeCountData][j] = sumsq / (Np - 1) 
+    //     }
+    //     //  compute filter mean
+    //     if (runFilterMean) {
+    //       if (allFail) { //  unweighted average
+    //         ws = 0
+    //         for (let nrow =0; nrow < Np; nrow++){
+    //           if (particles[nrow][j]) {
+    //             ws += particles[nrow][j]
+    //           }
+    //         } 
+    //         filterMean[timeCountData][j] = ws / Np
+    //       } else { //  weighted average
+    //         ws = 0
+    //         for (let nrow =0; nrow < Np; nrow++){
+    //           if (particles[nrow][j]) {
+    //             ws += particles[nrow][j] * weights[nrow]
+    //           }
+    //         }
+    //         filterMean[timeCountData][j] = ws / w
+    //       }
+    //     }
+    //   }
 
 
       if (!allFail) {
-        mathLib.nosortResamp(Np, weights, Np, sampleNum, 0)
+        object.nosortResamp(Np, weights, Np, sampleNum, 0)
         for (np = 0; np < Np; np++) { // copy the particles
-          temp[np] = [].concat(particles[sampleNum[np]])
-          temp[np][nvars - 1] = 0
+          temp[np] = {...particles[sampleNum[np]]}
+          temp[np].H = 0
         }
       } else {
         for (np = 0; np < Np; np++) { // copy the particles
@@ -187,9 +187,14 @@ let pfilter = function(input){
   }//endTime
 
     result = {};
+    
+    //result.predictionMean = predictionMean
+    console.log(loglik)
     result.predictionMean = []
     result.predictionVariance = []
 
+    console.log('running time:',(new Date() - START) /1000)
+    
     return result;
 }
 
