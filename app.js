@@ -1,42 +1,43 @@
 let pomp = require('./similar-to-R');
+let rpois = require('./similar-to-R/rpois')
+let mathLib = require('./similar-to-R/mathLib')
 
 fs = require('fs')
 rootDir = '.'
 
-rproc = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
-  let seas, beta, beta0, foi, R0, tt, va
+rproc = function (input) {
+  let seas, beta, beta0, foi,  tt, va
   let trans = new Array(6).fill(0)
   let rate = new Array(6) 
   
-  R0 = params[0], amplitude = params[1], gamma = params[2], mu = params[3], sigma = params[4] 
-  beta0 = R0 * (gamma + mu) * (sigma + mu) / sigma
+  beta0 = input.R_0 * (input.gamma + input.mu) * (input.sigma + input.mu) / input.sigma;
   
   va = 0;
-  tt = (t - Math.floor(t)) * 365.25
+  tt = (input.t - Math.floor(input.t)) * 365.25
   if ((tt >= 7 && tt <= 100) || (tt >= 115 && tt <= 199) || (tt >= 252 && tt <= 300) || (tt >= 308 && tt <= 356)) {
-    seas = 1 + amplitude * 0.2411 / 0.7589
+    seas = 1 + input.amplitude * 0.2411 / 0.7589
   } else {
-    seas = 1 - amplitude
+    seas = 1 - input.amplitude
   }                 
-  beta = R0 * (gamma + mu) * (sigma + mu) * seas / sigma  //seasonal transmission rate
-  foi = beta * I / pop
+  beta = input.R_0 * (input.gamma + input.mu) * (input.sigma + input.mu) * seas / input.sigma  //seasonal transmission rate
+  foi = beta * input.I / input.pop
   rate[0] = foi            //force of infection
-  rate[1] = mu             // natural S death
-  rate[2] = sigma          // rate of ending of latent stage
-  rate[3] = mu             // natural E death
-  rate[4] = gamma          // recovery
-  rate[5] = mu             // natural I death 
+  rate[1] = input.mu             // natural S death
+  rate[2] = input.sigma          // rate of ending of latent stage
+  rate[3] = input.mu             // natural E death
+  rate[4] = input.gamma          // recovery
+  rate[5] = input.mu             // natural I death 
    
-  let births = rpois.rpoisOne(birthrate * (1 - va) * del_t )// Poisson births
-  mathLib.reulermultinom(2, Math.round(S), 0, del_t, 0, rate, trans)
-  mathLib.reulermultinom(2, Math.round(E), 2, del_t, 2, rate, trans)
-  mathLib.reulermultinom(2, Math.round(I), 4, del_t, 4, rate, trans)
-  S += (births - trans[0] - trans[1])
-  E += (trans[0] - trans[2] - trans[3]) 
-  I += (trans[2] - trans[4] - trans[5]) 
-  R = pop - S - E - I
-  H += trans[4] 
-  return [S, E, I, R, H]
+  let births = rpois.rpoisOne(input.birthrate * (1 - va) * input.dt )// Poisson births
+  mathLib.reulermultinom(2, Math.round(input.S), 0, input.dt, 0, rate, trans)
+  mathLib.reulermultinom(2, Math.round(input.E), 2, input.dt, 2, rate, trans)
+  mathLib.reulermultinom(2, Math.round(input.I), 4, input.dt, 4, rate, trans)
+  input.S += (births - trans[0] - trans[1])
+  input.E += (trans[0] - trans[2] - trans[3]) 
+  input.I += (trans[2] - trans[4] - trans[5]) 
+  input.R = input.pop - input.S - input.E - input.I
+  input.H += trans[4] 
+  return input;
 };
 initz = function(input) {
   let m = input.pop / (input.S_0 + input.E_0 + input.R_0 + input.I_0),
@@ -47,21 +48,21 @@ initz = function(input) {
     H = 0
   return {S, E, I, R, H}
 };
-dmeas = function (rho, psi, H, dCases, giveLog = 1) {
+dmeas = function (input) {
   let lik
-  let mn = rho * H
-  let v = mn * (1.0 - rho + psi * psi * mn)
+  let mn = input.rho *input. H
+  let v = mn * (1.0 - input.rho + input.psi * input.psi * mn)
   let tol = 1.0e-18
-  let modelCases = Number(dCases)
+  let modelCases = Number(input.modelCases)
   if(!isNaN(modelCases)){
     if (modelCases > 0.0) {
       lik = mathLib.pnorm(modelCases + 0.5, mn, Math.sqrt(v) + tol, 1, 0) - mathLib.pnorm(modelCases - 0.5, mn, Math.sqrt(v) + tol, 1, 0) + tol
     } else {
       lik = mathLib.pnorm((modelCases + 0.5, mn, Math.sqrt(v) + tol)) + tol
     }
-    if (giveLog) lik = Math.log(lik)
+    if (input.giveLog) lik = Math.log(lik)
   } else {
-    lik = (giveLog) ? 0 : 1;
+    lik = (input.giveLog) ? 0 : 1;
   }
   return lik
 }
@@ -126,7 +127,7 @@ let m1 = new pomp({
 });
 
 current_params= {R0: 3.132490e+01 , amplitude: 3.883620e-01 , gamma: 7.305000e+01 , mu: 6.469830e-04 , sigma: 4.566000e+01 ,rho:  4.598709e-01 ,psi:  1.462546e-01 ,S_0:  3.399189e-02 ,E_0: 2.336327e-04 ,R_0: 9.657741e-01,I_0: 4.221789e-07}
-np= 20;
+np= 3;
 
 ss = pomp.pfilter({
   object: m1,
@@ -134,6 +135,7 @@ ss = pomp.pfilter({
   Np: np,
   filter_mean: true,
   pred_mean: true,
-  max_fail: 3000
+  max_fail: 3000,
+  pred_mean: true
 });
 console.log('finish');

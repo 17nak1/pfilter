@@ -13,9 +13,8 @@
  */
 
 let mathLib = require('./mathLib.js')
-let snippet = require('./modelSnippet.js')
 
-exports.simulate = function (Np, temp1, dt, interpolPop, interpolBirth, params, t1, t2 ) {
+module.exports = function (object, Np, temp1, dt, params, t1, t2 ) {
   let currentTime, steps, del_t, pop, birthrate
   
   steps = mathLib.numEulerSteps(t1, t2, dt) // Total number of steps in the interval (t1, t2)
@@ -23,10 +22,8 @@ exports.simulate = function (Np, temp1, dt, interpolPop, interpolBirth, params, 
   del_t = (t2 - t1) / steps
   currentTime = t1
   for (let i = 0; i < steps; i++) { // steps in each time interval
-    pop = interpolPop(currentTime)
-    birthrate = interpolBirth(currentTime)
     for (let np = 0; np < Np; np++){ //calc for each particle
-      temp[np] = snippet.rprocess(params, currentTime, del_t, temp[np], pop, birthrate)
+      temp[np] = object.rprocess({...params, ...{t: currentTime, dt: del_t}, ...temp[np], ...object.interpolator(currentTime)})
     }
     currentTime += del_t
     if (i == steps - 2) { // penultimate step

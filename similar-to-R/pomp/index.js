@@ -1,35 +1,36 @@
 let interpolatorFactory = require('./mathlib/interpolatorFactory')
-Pomp = function(params) {
-    if(params == undefined){
-        params = {};
+let simulator = require('./simulator')
+Pomp = function(input) {
+    if(input == undefined){
+        input = {};
     }
-    this.data = params.data || [];
-    this.times = params.times || [];
-    this.t0 = params.t0 || 0;
-    this.rprocess = params.rprocess || {};
-    this.dprocess = params.dprocess || {};
-    this.rmeasure = params.rmeasure || {};
-    this.dmeasure = params.dmeasure || {};
-    this.measurement_model = params.measurement_model || {};
-    this.skeleton = params.skeleton || {};
-    this.initializer = params.initializer || {};
-    this.rprior = params.rprior || {};
-    this.dprior = params.dprior || {};
-    this.params = params.params || {};
-    this.covar = params.covar || {};
-    this.tcovar = params.tcovar || {};
-    this.obsnames = params.obsnames || {};
-    this.statenames = params.statenames || {};
-    this.paramnames = params.paramnames || {};
-    this.covarnames = params.covarnames || {};
-    this.zeronames = params.zeronames || {};
-    this.PACKAGE = params.PACKAGE || {};
-    this.fromEstimationScale = params.fromEstimationScale || {};
-    this.toEstimationScale = params.toEstimationScale || {};
-    this.globals = params.globals || {};
-    this.cdir = params.cdir || {};
-    this.cfile = params.cfile || {};
-    this.shlib_args = params.shlib_args || {};
+    this.data = input.data || [];
+    this.times = input.times || [];
+    this.t0 = input.t0 || 0;
+    this.rprocess = input.rprocess || {};
+    this.dprocess = input.dprocess || {};
+    this.rmeasure = input.rmeasure || {};
+    this.dmeasure = input.dmeasure || {};
+    this.measurement_model = input.measurement_model || {};
+    this.skeleton = input.skeleton || {};
+    this.initializer = input.initializer || {};
+    this.rprior = input.rprior || {};
+    this.dprior = input.dprior || {};
+    this.params = input.input || {};
+    this.covar = input.covar || {};
+    this.tcovar = input.tcovar || {};
+    this.obsnames = input.obsnames || {};
+    this.statenames = input.statenames || {};
+    this.paramnames = input.paramnames || {};
+    this.covarnames = input.covarnames || {};
+    this.zeronames = input.zeronames || {};
+    this.PACKAGE = input.PACKAGE || {};
+    this.fromEstimationScale = input.fromEstimationScale || {};
+    this.toEstimationScale = input.toEstimationScale || {};
+    this.globals = input.globals || {};
+    this.cdir = input.cdir || {};
+    this.cfile = input.cfile || {};
+    this.shlib_args = input.shlib_args || {};
 
     let ep = 'in \'pomp\': ';
     if (this.data == undefined || this.data.length == 0) 
@@ -48,6 +49,7 @@ Pomp = function(params) {
     this.tcovar.shift();
 
     this.interpolator = interpolatorFactory(this.covarnames, this.tcovar, this.covar);
+    this.simulator = simulator;
 
 }
 
