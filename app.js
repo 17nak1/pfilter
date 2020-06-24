@@ -1,6 +1,4 @@
-let mathLib = require('./src/mathLib')
-let rpois = require('./src/rpois')
-let pomptest = require('./similar-to-R');
+let pomp = require('./similar-to-R');
 
 fs = require('fs')
 rootDir = '.'
@@ -41,11 +39,11 @@ rproc = function (params, t, del_t, [S,E,I,R,H], pop, birthrate) {
   return [S, E, I, R, H]
 };
 initz = function(input) {
-  let m = input.covar.pop / (input.params.S_0 + input.params.E_0 + input.params.R_0 + input.params.I_0),
-    S = Math.round(m * input.params.S_0),
-    E = Math.round(m * input.params.E_0),
-    I = Math.round(m * input.params.I_0),
-    R = Math.round(m * input.params.R_0),
+  let m = input.pop / (input.S_0 + input.E_0 + input.R_0 + input.I_0),
+    S = Math.round(m * input.S_0),
+    E = Math.round(m * input.E_0),
+    I = Math.round(m * input.I_0),
+    R = Math.round(m * input.R_0),
     H = 0
   return {S, E, I, R, H}
 };
@@ -91,7 +89,8 @@ zeronames = ["H"]
 let London_BiData = []
 let London_covar = []
 let London_covar_file = fs.readFileSync(rootDir+'/samples/London_covar.csv').toString()
-let lines = London_covar_file.split('\n')
+London_covar_file = London_covar_file.replace(/['"]+/g, '');
+let lines = London_covar_file.split(/\r\n|\n/)
 for (let i = 0; i < lines.length; i++) {
   London_covar.push(lines[i].split(','))
 }
@@ -100,7 +99,8 @@ if (London_covar[London_covar.length - 1].length === 1 ) {
 }
 
 let London_BiData_file = fs.readFileSync(rootDir+'/samples/London_BiDataMain.csv').toString()
-lines = London_BiData_file.split('\n')
+London_BiData_file = London_BiData_file.replace(/['"]+/g, '');
+lines = London_BiData_file.split(/\r\n|\n/)
 for (let i = 0; i < lines.length ; i++) {
   London_BiData.push(lines[i].split(','))
 }
@@ -108,7 +108,7 @@ if (London_BiData[London_BiData.length - 1].length === 1 ) {
   London_BiData.pop()
 }
 
-let m1 = new pomptest({
+let m1 = new pomp({
   data: London_BiData,
   times:"time",
   t0: 1940,
@@ -128,7 +128,7 @@ let m1 = new pomptest({
 current_params= {R0: 3.132490e+01 , amplitude: 3.883620e-01 , gamma: 7.305000e+01 , mu: 6.469830e-04 , sigma: 4.566000e+01 ,rho:  4.598709e-01 ,psi:  1.462546e-01 ,S_0:  3.399189e-02 ,E_0: 2.336327e-04 ,R_0: 9.657741e-01,I_0: 4.221789e-07}
 np= 20;
 
-ss = pomptest.pfilter({
+ss = pomp.pfilter({
   object: m1,
   params: current_params,
   Np: np,

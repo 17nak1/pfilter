@@ -17,8 +17,7 @@ let pfilter = function(params){
     
     times = [...[object.t0],...object.times]
     ntimes = times.length - 1;
-
-    init_x = object.initializer({covar: object.interpolator(object.t0),params:params});
+    init_x = object.initializer({...object.interpolator(object.t0),...params});
 
     result = {};
     result.predictionMean = []
