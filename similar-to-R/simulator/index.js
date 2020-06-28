@@ -14,7 +14,7 @@
 
 let mathLib = require('./mathLib.js')
 
-module.exports = function (object, Np, temp1, dt, params, t1, t2 ) {
+let simulator = function (Np, temp1, dt, params, t1, t2 ) {
   let currentTime, steps, del_t, pop, birthrate
   
   steps = mathLib.numEulerSteps(t1, t2, dt) // Total number of steps in the interval (t1, t2)
@@ -22,8 +22,11 @@ module.exports = function (object, Np, temp1, dt, params, t1, t2 ) {
   del_t = (t2 - t1) / steps
   currentTime = t1
   for (let i = 0; i < steps; i++) { // steps in each time interval
+    args = {...this.interpolator(currentTime), ...params}
+    args.t = currentTime;
+    args.dt = del_t;
     for (let np = 0; np < Np; np++){ //calc for each particle
-      temp[np] = object.rprocess({...params, ...{t: currentTime, dt: del_t}, ...temp[np], ...object.interpolator(currentTime)})
+      temp[np] = this.rprocess({...temp[np], ...args})
     }
     currentTime += del_t
     if (i == steps - 2) { // penultimate step
@@ -34,4 +37,6 @@ module.exports = function (object, Np, temp1, dt, params, t1, t2 ) {
   return temp
 }
 
+
+module.exports = simulator;
 
