@@ -34,7 +34,6 @@ let pfilter = function(args){
     let sampleNum = Array.from(Array(Np).keys())
     let condLoglik = []
     let stateSaved = []
-    let temp 
     let ws ,w , vsq, sum, sumsq, ess, loglik = 0, lik 
     let predictionMean, predictionVariance, filterMean
     let weights
@@ -55,7 +54,7 @@ let pfilter = function(args){
     state = this.initializer({...this.interpolator(t0), ...params})
 
     // First matrix of states at time t0; includes Np rows of repeated state 
-    temp = new Array(Np).fill(null).map(() => ({...state}))
+    this.temp = new Array(Np).fill(null).map(() => ({...state}))
     
     // Define t0 as the first time value 
     let k = t0
@@ -73,9 +72,9 @@ let pfilter = function(args){
         deltaT = tdata - k
         k2 = k + deltaT
         }
-        particles = this.simulator(Np, temp, dt, params, k, k2)
+        this.simulator(Np, dt, params, k, k2)
         for (np = 0; np < Np; np++) { // copy the particles
-        temp[np] = {...particles[sampleNum[np]]}
+        this.temp[np] = {...this.temp[sampleNum[np]]}
         }
     }
 
@@ -83,16 +82,16 @@ let pfilter = function(args){
         weights = []; normalWeights = []
         let k2 =  Number(this.times[timeCountData])
      
-        particles = this.simulator(Np, temp, dt, params, k, k2)
+        this.simulator(Np, dt, params, k, k2)
         
         // Weights are calculated based on liklihood at each time for each point.
         for (np = 0; np < Np; np++){ 
         //   if (defaults.runSaveStates) {
         //     stateSaved.push([k2, ...particles[np]]) //[S,E,I,R,H])
         //   }
-        particles.modelCases = Number(this.data[timeCountData])
-        particles.giveLog = 0
-          likvalue = this.dmeasure(particles[np])
+        this.temp[np].modelCases = Number(this.data[timeCountData])
+        this.temp[np].giveLog = 0
+          likvalue = this.dmeasure(this.temp[np])
           weights.push(likvalue)           
         }
         
@@ -180,13 +179,13 @@ let pfilter = function(args){
           if (!allFail) {
             mathLib.nosortResamp(Np, weights, Np, sampleNum, 0)
             for (np = 0; np < Np; np++) { // copy the particles
-              temp[np] = {...particles[sampleNum[np]]}
-              temp[np].H = 0
+              this.temp[np] = {...this.temp[sampleNum[np]]}
+              this.temp[np].H = 0
             }
           } else {
             for (np = 0; np < Np; np++) { // copy the particles
-                temp[np] = {...particles[sampleNum[np]]}
-                temp[np].H = 0
+                this.temp[np] = {...this.temp[sampleNum[np]]}
+                this.temp[np].H = 0
             }
           }
     

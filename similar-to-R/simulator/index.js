@@ -14,11 +14,10 @@
 
 let mathLib = require('./mathLib.js')
 
-let simulator = function (Np, temp1, dt, params, t1, t2 ) {
-  let currentTime, steps, del_t, pop, birthrate
+let simulator = function (Np, dt, params, t1, t2 ) {
+  let currentTime, steps, del_t
   
   steps = mathLib.numEulerSteps(t1, t2, dt) // Total number of steps in the interval (t1, t2)
-  temp = [].concat(temp1)
   del_t = (t2 - t1) / steps
   currentTime = t1
   for (let i = 0; i < steps; i++) { // steps in each time interval
@@ -26,7 +25,8 @@ let simulator = function (Np, temp1, dt, params, t1, t2 ) {
     args.t = currentTime;
     args.dt = del_t;
     for (let np = 0; np < Np; np++){ //calc for each particle
-      temp[np] = this.rprocess({...temp[np], ...args})
+      this.temp[np] = {...this.temp[np], ...args};
+      this.rprocess(this.temp[np])
     }
     currentTime += del_t
     if (i == steps - 2) { // penultimate step
@@ -34,7 +34,6 @@ let simulator = function (Np, temp1, dt, params, t1, t2 ) {
       currentTime =  t2 - del_t;
     }
   }
-  return temp
 }
 
 

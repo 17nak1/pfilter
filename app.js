@@ -10,7 +10,7 @@ rproc = function (args) {
   let trans = new Array(6).fill(0)
   let rate = new Array(6) 
   
-  beta0 = args.R_0 * (args.gamma + args.mu) * (args.sigma + args.mu) / args.sigma;
+  beta0 = args.R0 * (args.gamma + args.mu) * (args.sigma + args.mu) / args.sigma;
   
   va = 0;
   tt = (args.t - Math.floor(args.t)) * 365.25
@@ -19,7 +19,7 @@ rproc = function (args) {
   } else {
     seas = 1 - args.amplitude
   }                 
-  beta = args.R_0 * (args.gamma + args.mu) * (args.sigma + args.mu) * seas / args.sigma  //seasonal transmission rate
+  beta = args.R0 * (args.gamma + args.mu) * (args.sigma + args.mu) * seas / args.sigma  //seasonal transmission rate
   foi = beta * args.I / args.pop
   rate[0] = foi            //force of infection
   rate[1] = args.mu             // natural S death
@@ -127,7 +127,7 @@ myPomp = new pomp({
 });
 
 current_params= {R0: 3.132490e+01 , amplitude: 3.883620e-01 , gamma: 7.305000e+01 , mu: 6.469830e-04 , sigma: 4.566000e+01 ,rho:  4.598709e-01 ,psi:  1.462546e-01 ,S_0:  3.399189e-02 ,E_0: 2.336327e-04 ,R_0: 9.657741e-01,I_0: 4.221789e-07}
-np= 200;
+np= 2;
 
 ss = myPomp.pfilter({
   params: current_params,
