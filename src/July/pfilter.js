@@ -65,7 +65,7 @@ pfilterInternal = function (pomp, params, Np,
   let ntimes = times.length - 1;
   
   if (typeof Np === "function" || Np === undefined || Np <= 0) {
-    throw new Error(`Np Should be a positive number rather than${Np}`)
+    throw new Error(`Number of particles should be a positive number. ${Np} is not translated`)
   }
   if (Object.values(params).every(function(x){ return !Array.isArray(x)})) {
     onePar = true;
