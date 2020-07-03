@@ -1,272 +1,220 @@
+const { initState } = require("./initState.js");
+const { rprocessInternal } = require("./rprocessInternal.js");
+const { dmeasureInternal } = require("./dmeasureInternal.js");
+const { pfilter_computations } = require("./pfilterComputations.js");
 
-/**
- *  @file        pfilter.js
- *               A plain vanilla sequential Monte Carlo (particle filter) algorithm.
- *               Resampling is performed at each observation.
- *               
- *  @autor       Nazila Akhavan, nazila@kingsds.network
- *  @date        March 2019
- */
+exports.pfilter = function (object) {
+  
+  let params = object.params;
+  let Np = object.Np;
+  let tol = object.tol ? object.tol : 1e-17;
+  let maxFail = object.maxFail ? object.maxFail :  Infinity;
+  let predMean = object.predMean ? object.predMean :  false;
+  let predVar = object.predVar ? object.predVar :  false;
+  let filterMean = object.filterMean ? object.filterMean :  false;
+  let filterTraj = object.filterTraj ? object.filterTraj :  false;
+  let cooling = object.cooling;
+  let coolingm = object.coolingm;
+  let verbose = object.verbose ? object.verbose : false;
+  let saveStates = object.saveStates ? object.saveStates : false;
+  let saveParams = object.saveParams ? object.saveParams : false;
+  object = object.object;
 
-let fmin = require ('fmin')
-let mathLib = require('./mathLib')
-let snippet = require('./modelSnippet.js')
-let simulator = require ('./simulator.js')
+  if (params.length === 0)
+    throw new Error("In pfilterInternal: params must be specified");
+  let onePar = false;
+  
+  let times = [object.t0, ...object.times];
+  let ntimes = times.length - 1;
+  
+  if (typeof Np === "function" || Np === undefined || Np <= 0) {
+    throw new Error(`Number of particles should be a positive number. ${Np} is not translated`)
+  }
+  if (params.every(x => !Array.isArray(x))) { //there is only one parameter vector
+    onePar = true;
+    object.coef = params;
+    params = [params]; //as.matrix(params)
+  }
 
-
-let pfilter = {}
-
-pfilter.predictionMean = []
-pfilter.predictionVariance = []
-
-pfilter.run = function(input){
-
-  let defaults = {params:-1, Np:-1, toler:1e-17, maxFail:Infinity, runPredMean:0, runPredVar:0, runFilterMean:0, runSaveStates:0, timeZero:-1, dt:-1,
-    dataCases:0}
-  for(let prop in defaults) {
-    if(typeof input[prop] == 'undefined') {
-      input[prop] = defaults[prop]
+  let initx = initState(object, params, Np);
+  let nvars = initx[0].length;
+  let x = initx;
+  let xparticles, pparticles, pedigree
+    // set up storage for saving samples from filtering distributions
+    if (saveStates || filterTraj) {
+      xparticles =  new Array(ntimes);
     }
-  }
-
-  if (input.params === -1 || input.Np === -1 || input.timeZero === -1 || input.dt === -1) {
-    throw 'Some required arguments are missed'
-  }
-  let dataCases = input.dataCases
-  let dataCovar = input.dataCovar
-  let params = input.params
-  let maxFail = input.maxFail
-  let Np = input.Np
-  let toler = input.toler
-  let dt = input.dt
-  let t0 = input.timeZero
-  let deltaT = 14 / 365.25
-  let tdata = dataCases[0][0]
-  console.log("Np", Np)
-
-  let d1 = [] // read time and population from 1st data and make interpolation function
-  let d2 = [] // read time and birthrate from 1st data and make interpolation function
-  for (let i = 0; i < dataCovar.length; i++) {
-    d1.push([Number(dataCovar[i][0]), Number(dataCovar[i][1])])
-    d2.push([Number(dataCovar[i][0]), Number(dataCovar[i][2])])
-  }
-
-  // Define variables
-  let interpolPop = mathLib.interpolator (d1)
-  let interpolBirth = mathLib.interpolator (d2)
-  let START = new Date()
-  let [R0, amplitude, gamma, mu, sigma, rho, psi, S_0, E_0, I_0, R_0] = params
-  let nvars = 5 // number of states SEIRH
-  let doPredictionVariance = 1, doPredictionMean = 1, runFilterMean = 0 , allFail = 0
-  let timeLen = dataCases.length 
-  let nlost = 0
-  let particles = new Array(Np).fill(null).map(() => Array(5))
-  let state =[]
-  let sampleNum = Array.from(Array(Np).keys())
-  let condLoglik = []
-  let stateSaved = []
-  let temp 
-  let ws ,w , vsq, sum, sumsq, ess, loglik = 0, lik 
-  let predictionMean, predictionVariance, filterMean
-  let weights
-  let modelCases, likvalue
-  
-  // Initiate Matrix for chosen outputs
-  if (doPredictionMean) {
-    predictionMean = Array(timeLen).fill(null).map(() => Array(nvars))
-  }
-  if (doPredictionVariance) {
-    predictionVariance = Array(timeLen).fill(null).map(() => Array(nvars))
-  }
-  if (runFilterMean) {
-    filterMean = Array(timeLen).fill(null).map(() => Array(nvars))
-  }
-  
-  // Initial states from modelSnippet
-  state = snippet.initz(interpolPop(t0), S_0, E_0, I_0, R_0)
-
-  // First matrix of states at time t0; includes Np rows of repeated state 
-  temp = new Array(Np).fill(null).map(() => [].concat(state))
-  
-  // Define t0 as the first time value 
-  let k = t0
-
-  /**
-   *  Time loops
-   *  The first loop simulating from t0 to first time value in reported data.
-   *  The second one is based on times in reported data and calculates weights.  
-   *  Starting at time t_n we have results at time t_{n+1}. But in the second loop k2 use the 
-   *  results from the first loop which is in tdata and start calculing up to timeLen.
-   */
-  for (k = t0; k < tdata; k += deltaT){
-    k2 = k + deltaT
-    if ( k2 > tdata) {
-      deltaT = tdata - k
-      k2 = k + deltaT
+    if (saveParams) {
+      pparticles = new Array(ntimes);;
+    } else {
+      pparticles = [];
     }
-    particles = simulator.simulate (Np, temp, dt, interpolPop, interpolBirth, params, k, k2)
-    for (np = 0; np < Np; np++) { // copy the particles
-      temp[np] = [].concat(particles[sampleNum[np]])
+    if (filterTraj) {
+      pedigree = new Array(ntimes + 1);
     }
+
+  let loglik = new Array(ntimes);
+  let effSampleSize = new Array(ntimes).fill(0);
+  let nfail = 0;
+
+  // set up storage for prediction means, variances, etc.
+  let predm
+  if (predMean) {
+    predm = new Array(ntimes).fill(null).map(a => Array(nvars).fill(0));
+  } else {
+    predm = [];
+  }
+
+  let predv
+  if (predVar) {
+    predv = new Array(ntimes).fill(null).map(a => Array(nvars).fill(0));
+  } else {
+    predv = [];
   }
   
-  for (let timeCountData = 0; timeCountData < timeLen; timeCountData++){
-    weights = []; normalWeights = []
-    let k2 =  Number(dataCases[timeCountData][0])
- 
-    particles = simulator.simulate (Np, temp, dt, interpolPop, interpolBirth, params, k, k2)
-    
-    // Weights are calculated based on liklihood at each time for each point.
-    for (np = 0; np < Np; np++){ 
-      if (defaults.runSaveStates) {
-        stateSaved.push([k2, ...particles[np]]) //[S,E,I,R,H])
+  let filtm
+  if (filterMean) {
+    filtm  = new Array(ntimes).fill(null).map(a => Array(nvars).fill(0));
+  } else {
+    filtm = [];
+  }
+
+  if (filterTraj) {
+    throw new Error ('filterTraj is not implemented')
+  }
+  // main loop
+  let X
+  for (nt = 0; nt < ntimes; nt++) {
+    try {
+      X = rprocessInternal(object, x, [times[nt],times[nt + 1]], params, 1)
+    } catch (error) {
+      throw new Error(`In pfilterInternal: Process simulation error: ${error}`)
+    }
+  
+
+    if (predVar) { // check for nonfinite state variables and parameters
+      allFinite = X.every(a => a.every(x =>isFinite(x)))
+      if (!allFinite) {  // state variables
+        throw new Error("In pfilter.js: non-finite state variable(s): ");
       }
-      modelCases = Number(dataCases[timeCountData][1])
-      likvalue = snippet.dmeasure(rho, psi, particles[np][4], modelCases, giveLog = 0)
-      weights.push(likvalue)           
+    }
+
+    let weights = [];
+    try {
+      weights = dmeasureInternal(
+        object,
+        y = object.data[nt],
+        X,
+        times[nt + 1],
+        params,
+        log = false
+      ); 
+    } catch (error) {
+      console.error(`In mif2.js: error in calculation of weights: ${error}`);
+    }
+
+    let allFinite = weights.map(w => isFinite(w)).reduce((a, b) => a & b, 1);
+    if (!allFinite) {
+      throw new Error("In dmeasure: weights returns non-finite value");
     }
     
-      w = 0, ws = 0, nlost = 0
-      for (let i = 0; i < Np; i++) {
-        if (weights[i] > toler) {
-          w += weights[i]
-          ws += weights[i] ** 2
-        } else { // this particle is lost
-          weights[i] = 0;
-          nlost++
-        }
-      }
-      // if (nlost > maxFail) {
-      //   throw 'execution terminated. The number of filtering failures exceeds the maximum number of filtering failures allowed. '
-      // }
-      if (nlost >= Np) { 
-        allFail = 1 // all particles are lost
-      } else {
-        allFail = 0
-      }
-      
-      if (allFail) {
-        lik = Math.log(toler)           // minimum log-likelihood
-        ess = 0                         // zero effective sample size
-      } else {
-        ess = w * w / ws               // effective sample size
-        lik = Math.log(w / Np)         // mean of weights is likelihood
-      }
-      condLoglik[timeCountData] = [timeCountData + 1, lik]
-      // the total conditional logliklihood in the time process is loglik
-      loglik += lik
-      
-      // Compute outputs
-      for (let j = 0; j< nvars; j++) {
-        // compute prediction mean
-        if (doPredictionMean || doPredictionVariance) {
-          sum = 0
-          nlost = 0
-          for (let nrow =0; nrow < Np; nrow++){
-            if (particles[nrow][j]) {
-              sum += particles[nrow][j]
-            } else {
-              nlost++
-            }
-          }
-          sum /= Np
-          predictionMean[timeCountData][j] = sum
-        }  
-        // compute prediction variance
-        if (doPredictionVariance) {
-          sumsq = 0
-          for (let nrow = 0; nrow < Np; nrow++){
+    /** compute prediction mean, prediction variance, filtering mean,
+      * effective sample size, log-likelihood
+      * also do resampling if filtering has not failed
+      */ 
+    let xx;
+    try {
+      xx  = pfilter_computations(
+        X,
+        params,
+        Np = Np,
+        0, //rw_sd
+        predMean,
+        predVar ,
+        filterMean ,
+        trackancestry = filterTraj,
+        onePar,
+        weights = weights,
+        tol = tol
+      );
+    } catch (error) {
+      console.error(`particle-filter error: ${error}`) 
+    } 
 
-            if (particles[nrow][j]) {
-              vsq = particles[nrow][j] - sum
-              sumsq += Math.pow(vsq, 2)
-            }
-          }
-          predictionVariance[timeCountData][j] = sumsq / (Np - 1) 
-        }
-        //  compute filter mean
-        if (runFilterMean) {
-          if (allFail) { //  unweighted average
-            ws = 0
-            for (let nrow =0; nrow < Np; nrow++){
-              if (particles[nrow][j]) {
-                ws += particles[nrow][j]
-              }
-            } 
-            filterMean[timeCountData][j] = ws / Np
-          } else { //  weighted average
-            ws = 0
-            for (let nrow =0; nrow < Np; nrow++){
-              if (particles[nrow][j]) {
-                ws += particles[nrow][j] * weights[nrow]
-              }
-            }
-            filterMean[timeCountData][j] = ws / w
-          }
-        }
-      }
+    let allFail = xx.fail;
+    loglik[nt] = xx.loglik;
+    effSampleSize[nt] = xx.ess;
+    x = xx.states;
+    params = xx.params;
 
+    if (predMean)
+      predm[nt] = xx.pm;
 
-      if (!allFail) {
-        mathLib.nosortResamp(Np, weights, Np, sampleNum, 0)
-        for (np = 0; np < Np; np++) { // copy the particles
-          temp[np] = [].concat(particles[sampleNum[np]])
-          temp[np][nvars - 1] = 0
-        }
-      } else {
-        for (np = 0; np < Np; np++) { // copy the particles
-          temp[np] = [].concat(particles[np])
-          temp[np][nvars - 1] = 0
-        }
-      }
+    if (predVar)
+      predv[nt] = xx.pv;
 
-      k = k2
-  }//endTime
+    if (filterMean)
+      filtm[nt] = xx.fm;
 
-pfilter.predictionMean = predictionMean
-console.log(input.tempi)
-console.log(loglik)
+    if (filterTraj)
+      pedigree[[nt]] = xx.ancestry;
+
+    if (allFail) { // all particles are lost
+      nfail = nfail + 1;
+      if (nfail > maxFail)
+        throw new Error("In mif2Pfilter: too many filtering failures")
+    }
+
+    if (saveStates || filterTraj) {
+      xparticles[nt] = x;
+    }
+
+    if (saveParams) {
+      pparticles[nt] = params;
+    } 
+  } //end of main loop 
+
+  if (filterTraj) { // select a single trajectory
+    throw new Error("filterTraj is not translated")
+    // b = sample.int(n=length(weights),size=1L,replace=TRUE)
+    // filt.t[,1L,ntimes+1] = xparticles[[ntimes]][,b]
+    // for (nt in seq.int(from=ntimes-1,to=1L,by=-1L)) {
+    //   b = pedigree[[nt+1]][b]
+    //   filt.t[,1L,nt+1] = xparticles[[nt]][,b]
+    // }
+    // if (times[2L] > times[1L]) {
+    //   b = pedigree[[1L]][b]
+    //   filt.t[,1L,1L] = init.x[,b]
+    // } else {
+    //   filt.t = filt.t[,,-1L,drop=FALSE]
+    // }
+  }
+
+  if (!saveStates) xparticles = [];
+
+  if (nfail > 0) {
+    console.log("warning! filtering failure occurred.");
+  }
+
+  return {
+    object,
+    predMean: predm,
+    predVar: predv,
+    filterMean: filtm,
+    filterTraj: false,//filt.t
+    paramMatrix: [[]],
+    effSamplesize: effSampleSize,
+    condLoglik: loglik,
+    savedStates: xparticles,
+    savedParams: pparticles,
+    Np: Np,
+    tol: tol,
+    nfail: nfail,
+    loglik: loglik.reduce((a,b) => a + b, 0)
+  }
   
-  let createCsvWriter = require('csv-writer').createArrayCsvWriter;
-  let csvWriter = createCsvWriter({
-    header: ['i', 'loglik', 'running time'],
-    path: rootDir + '/samples/loglik.csv',
-    append : true
-  })
-  csvWriter.writeRecords( [[input.tempi,  loglik, (new Date() - START) /1000]])
-  .then(() => {
-  console.log('...loglik '+input.tempi)
-  })
-
-  csvWriter = createCsvWriter({
-    header: ['S', 'E', 'I', 'R', 'H'],
-    path: rootDir + '/samples/Result/predmean'+input.tempi+'.csv'
-  })  
-  csvWriter.writeRecords(predictionMean)
-    .then(() => {
-    console.log('...predictionMean '+input.tempi)
-  })
-
-  csvWriter = createCsvWriter({
-    header: ['S', 'E', 'I', 'R', 'H'],
-    path: rootDir + '/samples/Result/predvar'+input.tempi+'.csv'
-  })  
-  csvWriter.writeRecords(predictionVariance)
-    .then(() => {
-    console.log('...predictionvar '+input.tempi)
-  })
-
-  csvWriter = createCsvWriter({
-    header: ['lik'],
-    path: rootDir + '/samples/Result/condLoglik'+input.tempi+'.csv'
-  })  
-  csvWriter.writeRecords(condLoglik)
-    .then(() => {
-    console.log('...condLoglik '+input.tempi)
-  })
-      
-  console.log('running time:',(new Date() - START) /1000)
-
 }
 
-module.exports = pfilter
+
+
+

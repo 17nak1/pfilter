@@ -12,6 +12,7 @@ let mathLib = {}
 let erf = require('math-erf')
 let rbinom = require('./rbinom')
 let libUnif = require('lib-r-math.js');
+const { arrayrify } = require('lib-r-math.js/dist/src/lib/r-func');
 const {
     R: { numberPrecision },
     rng: { MersenneTwister, timeseed }
@@ -63,21 +64,22 @@ mathLib.numMapSteps = function (t1, t2, dt) {
 // Resampling function
 mathLib.nosortResamp = function (nw, w, np, p, offset) {
   for (j = 1; j < nw; j++) {
-   w[j] += w[j-1]
+   w[j] += w[j-1];
  }
   if (w[nw - 1] <= 0) {
     throw "in 'systematic_resampling': non-positive sum of weight"
   }
   let du = w[nw - 1] / np
   let u = -du * U.unif_rand()//Math.random()
-
-  for (j = 0, i = 0; j < np; j++) {
-    u += du
+  let i = 0;
+  for (let j = 0; j < np; j++) {
+    u += du;
     while ((u > w[i]) && (i < nw - 1)) i++;//looking for the low weight
-    p[j] = i
+    p[j] = i;
   }
+  
   if (offset){// add offset if needed
-    for (j = 0; j < np; j++) p[j] += offset
+    for (j = 0; j < np; j++) p[j] += offset;
   }
 }
 
@@ -223,6 +225,79 @@ mathLib.normalRand =function() {
     while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
     while(v === 0) v = Math.random();
     return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v )
+}
+
+mathLib.fromLogBarycentric = function (xN) {
+  var sum = 0;
+  for (let i = 0; i < xN.length; i++) {
+    xN[i] = Math.exp(xN[i]);
+    sum += xN[i];
+  }
+  for (let i = 0; i < xN.length; i++) {
+    xN[i] = xN[i] / sum;
+  }
+  return xN;
+}
+
+mathLib.toLogBarycentric = function (xN) {
+  let sum = 0;
+  for (let i = 0; i < xN.length; i++) {
+    sum += xN[i];
+  }
+  for (let i = 0; i < xN.length; i++) {
+    xN[i] = Math.log(xN[i] / sum);
+  }
+  return xN;
+}
+
+mathLib.logit = function (p) {
+  return Math.log(p / (1 - p))
+}
+
+mathLib.expit = function (x) {
+  return 1 / (1 + Math.exp(-x))
+}
+
+mathLib.rgammawn = function (sigma, dt) {
+  var sigmasq
+  sigmasq = Math.pow(sigma, 2)
+  return (sigmasq > 0) ? rgamma(1, dt / sigmasq, sigmasq) : dt
+}
+
+mathLib.logMeanExp = function (x) {
+  var mx = Math.max(...x)
+  var s = x.map((x,i) => Math.exp(x - mx))
+  var q = s.reduce((a, b) => a + b, 0)
+  return mx + Math.log(q / x.length)
+}
+
+mathLib.index = function(paramnames, a) {
+  let index = new Array(paramnames.length).fill(null);
+  for ( let  i =0; i < paramnames.length; i++) {
+    for (let j = 0; j < a.length; j++) {
+      if(paramnames[i] === a[j]) {
+        index[i] = j;
+        j = a.length;
+      }
+    }
+  }
+  return index;
+}
+
+mathLib.mean = function(x , w = 0) {
+  let nrow = x.length;
+  let ncol = x[0].length;
+  let mean = new Array(ncol).fill(0);
+  if (w === 0)
+    w = new Array(nrow).fill(1);
+  let sumw = w.reduce((a,b) => a+b, 0);
+  for (let i = 0; i < ncol; i ++) {
+    for (let j = 0; j < nrow; j++) {
+      mean[i] += x[j][i] * w[j];
+    }
+    mean[i] /= sumw; 
+  }  
+  return mean;
 }
 
 module.exports = mathLib;
