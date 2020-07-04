@@ -50,11 +50,15 @@ let pfilter = function(args){
         filterMean = Array(timeLen).fill(null).map(() => Array(nvars))
     }
 
+    Object.assign(params, this.interpolator(t0))
+    state.t = t0;
+    state.dt = dt;
     // Initial states from modelSnippet
-    state = this.initializer({...this.interpolator(t0), ...params})
+    state = this.initializer(params)
 
+    Object.assign(state, params)
     // First matrix of states at time t0; includes Np rows of repeated state 
-    this.temp = new Array(Np).fill(null).map(() => ({...state}))
+    this.temp = new Array(Np).fill(null).map(() => Object.assign({}, state))
     
     // Define t0 as the first time value 
     let k = t0
@@ -74,7 +78,7 @@ let pfilter = function(args){
         }
         this.simulator(Np, dt, params, k, k2)
         for (np = 0; np < Np; np++) { // copy the particles
-        this.temp[np] = {...this.temp[sampleNum[np]]}
+        this.temp[np] = Object.assign({}, this.temp[sampleNum[np]])
         }
     }
 
@@ -179,12 +183,16 @@ let pfilter = function(args){
           if (!allFail) {
             mathLib.nosortResamp(Np, weights, Np, sampleNum, 0)
             for (np = 0; np < Np; np++) { // copy the particles
-              this.temp[np] = {...this.temp[sampleNum[np]]}
+              if(np != sampleNum[np]){
+                this.temp[np] = Object.assign({}, this.temp[sampleNum[np]])                
+              }
               this.temp[np].H = 0
             }
           } else {
             for (np = 0; np < Np; np++) { // copy the particles
-                this.temp[np] = {...this.temp[sampleNum[np]]}
+                if(np != sampleNum[np]){
+                  this.temp[np] = Object.assign({},this.temp[sampleNum[np]])
+                }
                 this.temp[np].H = 0
             }
           }

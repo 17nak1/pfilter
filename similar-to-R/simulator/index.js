@@ -21,11 +21,11 @@ let simulator = function (Np, dt, params, t1, t2 ) {
   del_t = (t2 - t1) / steps
   currentTime = t1
   for (let i = 0; i < steps; i++) { // steps in each time interval
-    args = {...this.interpolator(currentTime), ...params}
+    args = this.interpolator(currentTime)   
     args.t = currentTime;
     args.dt = del_t;
     for (let np = 0; np < Np; np++){ //calc for each particle
-      this.temp[np] = {...this.temp[np], ...args};
+      Object.assign(this.temp[np],args) ;
       this.rprocess(this.temp[np])
     }
     currentTime += del_t
