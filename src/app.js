@@ -77,7 +77,7 @@ for(let i = 0; i < snippet.paramnames.length; i++) {
 
 let params_ic_fit = [];
 let params_mod_fit = ["R0", "amplitude", "mu", "rho", "psi"];
-
+let current_params = sortedCurrentParams[0];
 
 const rw_sd_f = function(time) {
   let rwSize = 0.05;
