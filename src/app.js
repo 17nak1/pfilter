@@ -77,13 +77,7 @@ for(let i = 0; i < snippet.paramnames.length; i++) {
 
 let params_ic_fit = [];
 let params_mod_fit = ["R0", "amplitude", "mu", "rho", "psi"];
-let cool_fraction = 0.05;
-let paramnames_rw = ["R0","amplitude","mu","rho","psi", "S_0", "E_0", "I_0", "R_0"];
 
-current_params = sortedCurrentParams[0];//only for this example:we need "for" loop
-
-
-let param_rwIndex = mathLib.index(snippet.paramnames,paramnames_rw);//index of params that are in rw;
 
 const rw_sd_f = function(time) {
   let rwSize = 0.05;
