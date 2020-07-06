@@ -43,6 +43,7 @@ for (let i = 1; i < lines.length ; i++) {
     dataCases.push(temp.slice(1));
   }
 }
+
 //* 3nd data set and names
 file = fs.readFileSync(rootDir+'/samples/initial_parameters.csv').toString()
 lines = file.split('\n');
@@ -79,19 +80,7 @@ let params_ic_fit = [];
 let params_mod_fit = ["R0", "amplitude", "mu", "rho", "psi"];
 let current_params = sortedCurrentParams[0];
 
-const rw_sd_f = function(time) {
-  let rwSize = 0.05;
-  let R0 = time < 1944 ? 0 : rwSize;
-  let amplitude = time < 1944 ? 0 : rwSize;
-  let mu = time < 1944 ? 0 : rwSize;
-  let rho = time < 1944 ? 0 : rwSize;
-  let psi = time < 1944 ? 0 : rwSize;
-  let S_0 = time < 1944 ? 0 : rwSize;
-  let E_0 = time < 1944 ? 0 : rwSize;
-  let I_0 = time < 1944 ? 0 : rwSize;
-  let R_0 = time < 1944 ? 0 : rwSize;
-  return [R0, amplitude, mu, rho, psi, S_0, E_0, I_0, R_0];
-}
+
 ///////////////////////////////////////////////////
 
 /////////////////////////////////////
@@ -110,7 +99,6 @@ const pomp = {
   fromEstimationScale: snippet.fromEst,
   statenames: snippet.statenames,
   paramnames: snippet.paramnames,
-  paramnamesRw: snippet.paramnames_rw,
   coef: current_params,
 }
 let d1 = [], d2 = [];
@@ -122,14 +110,14 @@ for (let i = 0; i < pomp.covar.length; i++) {
 pomp.population = mathLib.interpolator(d1);
 pomp.birthrate = mathLib.interpolator(d2);
 let t = new Date()
-let pf = pfilter({object: pomp, params: current_params, Np: 20000, filterMean: true, predMean: true, maxFail: 3000})
+let pf = pfilter({object: pomp, params: current_params, Np: 0000, filterMean: true, predMean: true, maxFail: 3000})
 
 console.log(new Date() - t, pf.loglik)
 
 let createCsvWriter = require('csv-writer').createArrayCsvWriter;
   let csvWriter = createCsvWriter({
     header: [],
-    path: './predmean.csv',
+    path: '../samples/predmean.csv',
     append : true
   })
   csvWriter.writeRecords( pf.predMean)

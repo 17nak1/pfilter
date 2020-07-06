@@ -196,6 +196,10 @@ exports.pfilter = function (object) {
     console.log("warning! filtering failure occurred.");
   }
 
+  if(predMean) predm.unshift(object.statenames);
+  if(predVar) predv.unshift(object.statenames);
+  if(filterMean) filtm.unshift(object.statenames);
+  
   return {
     object,
     predMean: predm,
