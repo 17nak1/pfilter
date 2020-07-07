@@ -17,7 +17,7 @@ let dataCovar = [];
 let dataCovarTimes = [];
 let currentParams = []; 
 
-// 1st data set; read all rows and delete last one if it is ['']
+// 1st data set;
 let temp, file;
 file = fs.readFileSync(rootDir+'/samples/London_covar.csv').toString();
 let lines = file.split('\n');
@@ -81,6 +81,7 @@ let params_mod_fit = ["R0", "amplitude", "mu", "rho", "psi"];
 let current_params = sortedCurrentParams[0];
 
 
+
 ///////////////////////////////////////////////////
 
 /////////////////////////////////////
@@ -110,7 +111,7 @@ for (let i = 0; i < pomp.covar.length; i++) {
 pomp.population = mathLib.interpolator(d1);
 pomp.birthrate = mathLib.interpolator(d2);
 let t = new Date()
-let pf = pfilter({object: pomp, params: current_params, Np: 0000, filterMean: true, predMean: true, maxFail: 3000})
+let pf = pfilter({object: pomp, params: current_params, Np: 1000, filterMean: true, predMean: true, maxFail: 3000})
 
 console.log(new Date() - t, pf.loglik)
 

@@ -206,7 +206,7 @@ exports.pfilter = function (object) {
     predVar: predv,
     filterMean: filtm,
     filterTraj: false,//filt.t
-    paramMatrix: [[]],
+    paramMatrix: [[null]],
     effSamplesize: effSampleSize,
     condLoglik: loglik,
     savedStates: xparticles,
