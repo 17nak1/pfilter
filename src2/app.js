@@ -15,7 +15,7 @@ let dataCases = [];
 let dataCasesTimes = [];
 let dataCovar = [];
 let dataCovarTimes = [];
-let currentParams = []; 
+let currentParams = {}; 
 
 // 1st data set; read all rows and delete last one if it is ['']
 let temp, file;
@@ -46,39 +46,21 @@ for (let i = 1; i < lines.length ; i++) {
 
 //* 3nd data set and names
 file = fs.readFileSync(rootDir+'/samples/initial_parameters.csv').toString()
-lines = file.split('\n');
+lines = file.split(/\r\n|\n/);
 let currentParams_name = lines[0].split(',');
 for (let i = 1; i < lines.length ; i++) {
   temp = lines[i].split(',');
   if(temp.length > 1) {
     temp = temp.map(function (x) {return Number(x)});
-    currentParams.push(temp);
-  }
-}
-
-//remove "\r" from the last variable's name.
-let st = currentParams_name[currentParams_name.length - 1];
-currentParams_name[currentParams_name.length - 1] = st.substring(0, st.length - 1);
-st = dataCovar_name[dataCovar_name.length - 1];
-dataCovar_name[dataCovar_name.length - 1] = st.substring(0, st.length - 1);
-st = dataCases_name[dataCases_name.length - 1];
-dataCases_name[dataCases_name.length - 1] = st.substring(0, st.length - 1);
-
-let sortedCurrentParams = new Array(currentParams.length).fill(Array(currentParams[0].length));
-// sortedCurrentParams is sorted currentParams based on snippet.paramnames.
-for(let i = 0; i < snippet.paramnames.length; i++) {
-  for( let j = 0; j < currentParams_name.length; j++) {
-    if(snippet.paramnames[i] === currentParams_name[j] || snippet.paramnames[i] +"_0" === currentParams_name[j]) {
-      for (let k = 0; k < currentParams.length; k++) {
-        sortedCurrentParams[k][i] = currentParams[k][j];
-      }
+    for(let j = 0; j < temp.length; j++){
+      currentParams[currentParams_name[j]] = temp[j];
     }
-  }       
+    
+  }
 }
 
 let params_ic_fit = [];
 let params_mod_fit = ["R0", "amplitude", "mu", "rho", "psi"];
-let current_params = sortedCurrentParams[0];
 
 
 ///////////////////////////////////////////////////
@@ -99,7 +81,7 @@ const pomp = {
   fromEstimationScale: snippet.fromEst,
   statenames: snippet.statenames,
   paramnames: snippet.paramnames,
-  coef: current_params,
+  coef: currentParams,
 }
 let d1 = [], d2 = [];
 for (let i = 0; i < pomp.covar.length; i++) {
@@ -110,14 +92,14 @@ for (let i = 0; i < pomp.covar.length; i++) {
 pomp.population = mathLib.interpolator(d1);
 pomp.birthrate = mathLib.interpolator(d2);
 let t = new Date()
-let pf = pfilter({object: pomp, params: current_params, Np: 200, filterMean: true, predMean: true, maxFail: 3000})
+let pf = pfilter({object: pomp, params: currentParams, Np: 200, filterMean: true, predMean: true, maxFail: 3000})
 
 console.log(new Date() - t, pf.loglik)
 
 let createCsvWriter = require('csv-writer').createArrayCsvWriter;
   let csvWriter = createCsvWriter({
     header: [],
-    path: rootDir+'/samples/predmean.csv',
+    path: './samples/predmean.csv',
     append : true
   })
   csvWriter.writeRecords( pf.predMean)
