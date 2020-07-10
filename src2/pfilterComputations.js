@@ -16,10 +16,10 @@ const mathLib = require("./mathLib.js")
 exports.pfilter_computations = function (x, params, Np, rw_sd, predmean, predvar,
   filtmean, trackancestry, onepar, weights, toler, param_rwIndex)
 {
-  let nvars = 5;//x[0].length;
+  let nvars = Object.keys(x[0]).length;
   let nreps = x.length;
-  let npars = 11;//params[0].length;
-  let nparreps = 2;//params.length;
+  let npars = Object.keys(params[0]).length;
+  let nparreps = params.length;
 
   // if (nreps % params.length != 0)
   //   throw new Error("In pfilter_computations: ncol('states') should be a multiple of ncol('params')"); // # nocov
@@ -100,45 +100,46 @@ exports.pfilter_computations = function (x, params, Np, rw_sd, predmean, predvar
     xanc = INTEGER(anc);
   }
   let sum = 0;
+  let nvarName = Object.keys(x[0]);
   for (let j = 0; j < nvars; j++) {	// state variables
 
-    // compute prediction mean
-    // if (predmean || predvar) {
-    //   sum = 0;
-    //   for (let k = 0; k < nreps; k++) {
-    //     sum += x[k][j];
-    //   }
-    //   sum /= nreps;
-    //   xpm[j] = sum;
-    // }
+    //compute prediction mean
+    if (predmean || predvar) {
+      sum = 0;
+      for (let k = 0; k < nreps; k++) {
+        sum += x[k][nvarName[j]];
+      }
+      sum /= nreps;
+      xpm[nvarName[j]] = sum;
+    }
 
     // compute prediction variance
     if (predvar) {
       let sumsq = 0;
       let vsq;
       for (let k = 0; k < nreps; k++) {
-        vsq = x[k][j] - sum;
+        vsq = x[k][nvarName[j]] - sum;
         sumsq += vsq * vsq;
       }
-      xpv[j] = sumsq / (nreps - 1);
+      xpv[nvarName[j]] = sumsq / (nreps - 1);
     }
 
     //  compute filter mean
-    // if (filtmean) {
-    //   if (all_fail) {		// unweighted average
-    //     let ws = 0;
-    //     for (let k = 0; k < nreps; k++) {
-    //       ws += x[k][j];
-    //     }
-    //     xfm[j] = ws/ nreps;
-    //   } else { 			// weighted average
-    //     let ws = 0;
-    //     for (let k = 0; k < nreps; k++) {
-    //       ws += x[k][j] * weights[k];
-    //     }
-    //     xfm[j] = ws / w;
-    //   }
-    // }
+    if (filtmean) {
+      if (all_fail) {		// unweighted average
+        let ws = 0;
+        for (let k = 0; k < nreps; k++) {
+          ws += x[k][nvarName[j]];
+        }
+        xfm[nvarName[j]] = ws/ nreps;
+      } else { 			// weighted average
+        let ws = 0;
+        for (let k = 0; k < nreps; k++) {
+          ws += x[k][nvarName[j]] * weights[k];
+        }
+        xfm[nvarName[j]] = ws / w;
+      }
+    }
   }
 
   // compute means and variances for parameters (if needed)

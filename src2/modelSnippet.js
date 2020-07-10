@@ -57,7 +57,7 @@ snippet.rprocess = function (pomp, states, params, t, deltaT, interpolatorObj) {
   let pop =interpolatorObj.pop;
   let birthrate = interpolatorObj.birthrate;
   let seas, beta, beta0, foi, tt, va;
-  let length = pomp.statenames.length - pomp.zeronames.length - 1;
+  let length = 3;
   let trans = new Array(length * 2).fill(0);
   let rate = new Array(length * 2); 
 
