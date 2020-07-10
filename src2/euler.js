@@ -11,7 +11,7 @@ exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
     throw new Error("In euler.js: 'delta.t' should be a positive number");
   let nvars = Object.keys(xstart[0]).length;
   let nreps = xstart.length;
-  let npars = Object.keys(params).length;
+  let npars = Object.keys(params[0]).length;
   let ntimes = times.length;
 
   let zidx = mathLib.index(statenames, zeronames);
@@ -26,11 +26,9 @@ exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
     
     // set accumulator variables to zero
     for (j = 0; j < nreps; j++) {
-      // for (i = 0; i < nvars; i++) {
-      //   if(zidx[i] !== null)
-      //    xt[j][i] = 0;
-      // } 
-      xt[j].H = 0;
+      for (i = 0; i < zeronames.length; i++) {
+         xt[j][zeronames[i]] = 0;
+      } 
     }
     switch (method) {
       case 1:			// one step
@@ -50,9 +48,9 @@ exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
     }
 
     for (let k = 0; k < nstep; k++) { // loop over Euler steps
-      Object.assign(params, object.interpolator(t));
+      let  interpolatorObj = object.interpolator(t);
       for (let j = 0 ; j < nreps; j++) { // loop over replicates
-         xt[j] = func(object, xt[j], params, t, dt);
+         xt[j] = func(object, xt[j], params[j], t, dt, interpolatorObj);
       }
       t += dt;
 

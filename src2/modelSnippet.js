@@ -40,7 +40,7 @@ let dataIndex = {
 }
 
 
-snippet.rprocess = function (pomp, states, params, t, deltaT) {
+snippet.rprocess = function (pomp, states, params, t, deltaT, interpolatorObj) {
   
   let S = states.S;
   let E = states.E;
@@ -54,8 +54,8 @@ snippet.rprocess = function (pomp, states, params, t, deltaT) {
   let mu = params.mu;
   let sigma = params.sigma ;
 
-  let pop =params.pop;
-  let birthrate = params.birthrate;
+  let pop =interpolatorObj.pop;
+  let birthrate = interpolatorObj.birthrate;
   let seas, beta, beta0, foi, tt, va;
   let length = pomp.statenames.length - pomp.zeronames.length - 1;
   let trans = new Array(length * 2).fill(0);

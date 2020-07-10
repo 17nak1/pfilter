@@ -30,11 +30,11 @@ exports.pfilter = function (args) {
   if (typeof Np === "function" || Np === undefined || Np <= 0) {
     throw new Error(`Number of particles should be a positive number. ${Np} is not translated`)
   }
-  // if (params.every(x => !Array.isArray(x))) { //there is only one parameter vector
-  //   onePar = true;
-  //   object.coef = params;
-  //   params = [params]; //as.matrix(params)
-  // }
+  if (!Array.isArray(params) || params.every(x => !Array.isArray(x))) { //there is only one parameter vector
+    onePar = true;
+    object.coef = params;
+    params = [params]; //as.matrix(params)
+  }
 
   let initx = initState(object, params, Np);
   let nvars = Object.keys(initx[0]).length;
@@ -60,21 +60,20 @@ exports.pfilter = function (args) {
   // set up storage for prediction means, variances, etc.
   let predm
   if (predMean) {
-    predm = new Array(ntimes).fill(null).map(a => Array(nvars).fill(0));
+    predm = new Array(ntimes).fill({});
   } else {
     predm = [];
   }
 
   let predv
   if (predVar) {
-    predv = new Array(ntimes).fill(null).map(a => Array(nvars).fill(0));
-  } else {
+    predv = new Array(ntimes).fill({});
     predv = [];
   }
   
   let filtm
   if (filterMean) {
-    filtm  = new Array(ntimes).fill(null).map(a => Array(nvars).fill(0));
+    filtm  = new Array(ntimes).fill({});
   } else {
     filtm = [];
   }

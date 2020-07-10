@@ -111,7 +111,7 @@ for (let i = 0; i < pomp.covar.length; i++) {
 pomp.population = mathLib.interpolator(d1);
 pomp.birthrate = mathLib.interpolator(d2);
 let t = new Date()
-let pf = pfilter({object: pomp, params: current_params, Np: 1000, filterMean: true, predMean: true, maxFail: 3000})
+let pf = pfilter({object: pomp, params: current_params, Np: 200, filterMean: true, predMean: true, maxFail: 3000})
 
 console.log(new Date() - t, pf.loglik)
 

@@ -16,7 +16,7 @@ const do_rprocess = function (object, xstart, times, params, offset, args) {
   let nvars = Object.keys(xstart[0]).length;
   let nrepsx = xstart.length;  
   let npars = Object.keys(params).length;
-  let nreps = 1;//params.length;
+  let nreps = params.length;
 
   if (nrepsx > nreps) {		// more ICs than parameters
     if (params.length === 1) params = new Array(nrepsx).fill(null).map(a => params[0]);

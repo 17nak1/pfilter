@@ -8,10 +8,10 @@ const do_dmeasure = function (object, y, x, times, params, give_log) {
   if (!times || ntimes < 1)
     throw new Error("In 'dmeasureInternal': times is not defined");
   
-  let nvars = 5;//x[0].length;
+  let nvars = Object.keys(x[0]).length;
   let nrepsx = x.length; 
-  let npars = 11;//params[0].length;
-  let nrepsp = 2;//params.length;
+  let npars = Object.keys(params[0]).length;
+  let nrepsp = params.length;
   
   nreps = (nrepsp > nrepsx) ? nrepsp : nrepsx;
 
@@ -29,7 +29,7 @@ const do_dmeasure = function (object, y, x, times, params, give_log) {
    for (k = 0; k < ntimes; k++) { // loop over times.Note:Only ntimes = 1 in ths translation
     for (let j = 0; j < nreps; j++) { // loop over replicates
       if (nrepsp === 1) params[j] = params[0];
-      F[j] = ff(object, y, x[j], params,give_log);
+      F[j] = ff(object, y, x[j], params[j],give_log);
     }
   }
   return F;
