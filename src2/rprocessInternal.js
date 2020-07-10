@@ -13,9 +13,9 @@ const do_rprocess = function (object, xstart, times, params, offset, args) {
   let off = Number(offset) ;
   if ((off < 0)||(off >= ntimes))
     throw new Error(`illegal 'offset' value ${off}`);
-  let nvars = 5;//xstart[0].length;
+  let nvars = Object.keys(xstart[0]).length;
   let nrepsx = xstart.length;  
-  let npars = 11;//params[0].length;
+  let npars = Object.keys(params).length;
   let nreps = 1;//params.length;
 
   if (nrepsx > nreps) {		// more ICs than parameters

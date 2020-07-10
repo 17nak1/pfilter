@@ -92,13 +92,13 @@ snippet.rprocess = function (pomp, states, params, t, deltaT) {
   return {S, E, I, R, H}
 }
 
-snippet.initz = function(pomp, states) {
+snippet.initz = function(args) {
   
-  let m = pomp.population(pomp.t0) / (states.S_0 + states.E_0 + states.R_0 + states.I_0);
-  let S_0 = Math.round(m * states.S_0);
-  let E_0 = Math.round(m * states.E_0);
-  let I_0 = Math.round(m * states.I_0);
-  let R_0 = Math.round(m * states.R_0);
+  let m = args.pop / (args.S_0 + args.E_0 + args.R_0 + args.I_0);
+  let S_0 = Math.round(m * args.S_0);
+  let E_0 = Math.round(m * args.E_0);
+  let I_0 = Math.round(m * args.I_0);
+  let R_0 = Math.round(m * args.R_0);
   let H_0 = 0;
   return {S:S_0, E:E_0, I:I_0, R:R_0, H:H_0};
 }

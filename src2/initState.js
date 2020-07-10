@@ -27,6 +27,7 @@ const do_init_state = function (object, params, ns) {
   //     }
   //   }
   // }
-  let initVector =  object.initializer(object, params);  
+  Object.assign(params , object.interpolator(object.t0))
+  let initVector =  object.initializer( params);  
   return  new Array(ns).fill(null).map(a => initVector);
 }

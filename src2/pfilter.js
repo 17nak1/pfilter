@@ -3,24 +3,24 @@ const { rprocessInternal } = require("./rprocessInternal.js");
 const { dmeasureInternal } = require("./dmeasureInternal.js");
 const { pfilter_computations } = require("./pfilterComputations.js");
 
-exports.pfilter = function (object) {
+exports.pfilter = function (args) {
   
-  let params = object.params;
-  let Np = object.Np;
-  let tol = object.tol ? object.tol : 1e-17;
-  let maxFail = object.maxFail ? object.maxFail :  Infinity;
-  let predMean = object.predMean ? object.predMean :  false;
-  let predVar = object.predVar ? object.predVar :  false;
-  let filterMean = object.filterMean ? object.filterMean :  false;
-  let filterTraj = object.filterTraj ? object.filterTraj :  false;
-  let cooling = object.cooling;
-  let coolingm = object.coolingm;
-  let verbose = object.verbose ? object.verbose : false;
-  let saveStates = object.saveStates ? object.saveStates : false;
-  let saveParams = object.saveParams ? object.saveParams : false;
-  object = object.object;
+  let params = args.params;
+  let Np = args.Np;
+  let tol = args.tol ? args.tol : 1e-17;
+  let maxFail = args.maxFail ? args.maxFail :  Infinity;
+  let predMean = args.predMean ? args.predMean :  false;
+  let predVar = args.predVar ? args.predVar :  false;
+  let filterMean = args.filterMean ? args.filterMean :  false;
+  let filterTraj = args.filterTraj ? args.filterTraj :  false;
+  let cooling = args.cooling;
+  let coolingm = args.coolingm;
+  let verbose = args.verbose ? args.verbose : false;
+  let saveStates = args.saveStates ? args.saveStates : false;
+  let saveParams = args.saveParams ? args.saveParams : false;
+  object = args.object;
 
-  if (params.length === 0)
+  if (Object.keys(params).length === 0)
     throw new Error("In pfilterInternal: params must be specified");
   let onePar = false;
   
@@ -37,7 +37,7 @@ exports.pfilter = function (object) {
   // }
 
   let initx = initState(object, params, Np);
-  let nvars = 5;//initx[0].length;
+  let nvars = Object.keys(initx[0]).length;
   let x = initx;
   let xparticles, pparticles, pedigree
     // set up storage for saving samples from filtering distributions

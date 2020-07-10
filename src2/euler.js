@@ -9,10 +9,10 @@ exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
   let statenames = object.statenames; 
   if (deltat <= 0)
     throw new Error("In euler.js: 'delta.t' should be a positive number");
-  let nvars = 5;//xstart[0].length;
+  let nvars = Object.keys(xstart[0]).length;
   let nreps = xstart.length;
-  let npars = 11;//params.length;
-  let ntimes = 2;//times.length;
+  let npars = Object.keys(params).length;
+  let ntimes = times.length;
 
   let zidx = mathLib.index(statenames, zeronames);
 
@@ -50,8 +50,7 @@ exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
     }
 
     for (let k = 0; k < nstep; k++) { // loop over Euler steps
-      params.pop = object.population(t);
-      params.birthrate = object.birthrate(t);
+      Object.assign(params, object.interpolator(t));
       for (let j = 0 ; j < nreps; j++) { // loop over replicates
          xt[j] = func(object, xt[j], params, t, dt);
       }

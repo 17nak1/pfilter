@@ -7,6 +7,7 @@ let snippet = require('./modelSnippet.js');
 let fs = require('fs');
 let mathLib = require('./mathLib.js');
 let { pfilter } = require('./pfilter.js');
+let pomp = require('./pomp.js');
 
 
 rootDir = '.'
@@ -20,8 +21,9 @@ let currentParams = {};
 // 1st data set; read all rows and delete last one if it is ['']
 let temp, file;
 file = fs.readFileSync(rootDir+'/samples/London_covar.csv').toString();
-let lines = file.split('\n');
-let dataCovar_name = lines[0].split(',');
+let lines = file.split(/\r\n|\n/);
+let dataCovar_name = lines[0].replace(/['"]+/g, '').split(',');
+dataCovar_name.shift();
 for (let i = 1; i < lines.length; i++) {
   temp = lines[i].split(',');
   if(temp.length > 1) {
@@ -33,8 +35,9 @@ for (let i = 1; i < lines.length; i++) {
 
 //* 2nd data set
 file = fs.readFileSync(rootDir+'/samples/London_BiDataMain.csv').toString()
-lines = file.split('\n');
-let dataCases_name = lines[0].split(',');
+lines = file.split(/\r\n|\n/);
+let dataCases_name = lines[0].replace(/['"]+/g, '').split(',');
+dataCases_name.shift();
 for (let i = 1; i < lines.length ; i++) {
   temp = lines[i].split(',');
   if(temp.length > 1) {
@@ -47,7 +50,7 @@ for (let i = 1; i < lines.length ; i++) {
 //* 3nd data set and names
 file = fs.readFileSync(rootDir+'/samples/initial_parameters.csv').toString()
 lines = file.split(/\r\n|\n/);
-let currentParams_name = lines[0].split(',');
+let currentParams_name = lines[0].replace(/['"]+/g, '').split(',');
 for (let i = 1; i < lines.length ; i++) {
   temp = lines[i].split(',');
   if(temp.length > 1) {
@@ -66,7 +69,7 @@ let params_mod_fit = ["R0", "amplitude", "mu", "rho", "psi"];
 ///////////////////////////////////////////////////
 
 /////////////////////////////////////
-const pomp = {
+const mypomp = new pomp({
   data :  dataCases,
   times:  dataCasesTimes,
   t0: 1940,
@@ -82,17 +85,11 @@ const pomp = {
   statenames: snippet.statenames,
   paramnames: snippet.paramnames,
   coef: currentParams,
-}
-let d1 = [], d2 = [];
-for (let i = 0; i < pomp.covar.length; i++) {
-  d1.push([Number(pomp.tcovar[i]), Number(pomp.covar[i][0])])
-  d2.push([Number(pomp.tcovar[i]), Number(pomp.covar[i][1])])
-}
-
-pomp.population = mathLib.interpolator(d1);
-pomp.birthrate = mathLib.interpolator(d2);
+  covarnames: dataCovar_name,
+  obsnames: dataCases_name,
+});
 let t = new Date()
-let pf = pfilter({object: pomp, params: currentParams, Np: 200, filterMean: true, predMean: true, maxFail: 3000})
+let pf = pfilter({object: mypomp, params: currentParams, Np: 200, filterMean: true, predMean: true, maxFail: 3000})
 
 console.log(new Date() - t, pf.loglik)
 
