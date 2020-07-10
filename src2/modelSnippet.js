@@ -92,9 +92,9 @@ snippet.rprocess = function (pomp, states, params, t, deltaT, interpolatorObj) {
   return {S, E, I, R, H}
 }
 
-snippet.initz = function(args) {
+snippet.initz = function(args, covar) {
   
-  let m = args.pop / (args.S_0 + args.E_0 + args.R_0 + args.I_0);
+  let m = covar.pop / (args.S_0 + args.E_0 + args.R_0 + args.I_0);
   let S_0 = Math.round(m * args.S_0);
   let E_0 = Math.round(m * args.E_0);
   let I_0 = Math.round(m * args.I_0);

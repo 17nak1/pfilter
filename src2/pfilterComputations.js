@@ -95,10 +95,10 @@ exports.pfilter_computations = function (x, params, Np, rw_sd, predmean, predvar
     }
   }
 
-  if (trackancestry) {
-    PROTECT(anc = NEW_INTEGER(np)); nprotect++;
-    xanc = INTEGER(anc);
-  }
+  // if (trackancestry) {
+  //   PROTECT(anc = NEW_INTEGER(np)); nprotect++;
+  //   xanc = INTEGER(anc);
+  // }
   let sum = 0;
   let nvarName = Object.keys(x[0]);
   for (let j = 0; j < nvars; j++) {	// state variables
@@ -231,11 +231,11 @@ exports.pfilter_computations = function (x, params, Np, rw_sd, predmean, predvar
   }
   retval.params = params;
   
-  // if (all_fail || !do_par_resamp) {
-  //   retval.params = params;
-  // } else {
-  //   retval.params = newparams;
-  // }
+  if (all_fail || !do_par_resamp) {
+    retval.params = params;
+  } else {
+    retval.params = newparams;
+  }
 
   if (predmean) {
     retval.pm = xpm;

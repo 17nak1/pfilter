@@ -2,6 +2,7 @@ const { initState } = require("./initState.js");
 const { rprocessInternal } = require("./rprocessInternal.js");
 const { dmeasureInternal } = require("./dmeasureInternal.js");
 const { pfilter_computations } = require("./pfilterComputations.js");
+const { statenames } = require("./modelSnippet.js");
 
 exports.pfilter = function (args) {
   
@@ -60,7 +61,7 @@ exports.pfilter = function (args) {
   // set up storage for prediction means, variances, etc.
   let predm
   if (predMean) {
-    predm = new Array(ntimes).fill({});
+    predm = new Array(ntimes).fill(null).map( a => []);
   } else {
     predm = [];
   }
@@ -90,7 +91,6 @@ exports.pfilter = function (args) {
       throw new Error(`In pfilterInternal: Process simulation error: ${error}`)
     }
   
-
     if (predVar) { // check for nonfinite state variables and parameters
       allFinite = X.every(a => a.every(x =>isFinite(x)))
       if (!allFinite) {  // state variables
@@ -146,8 +146,15 @@ exports.pfilter = function (args) {
     x = xx.states;
     params = xx.params;
 
-    if (predMean)
-      predm[nt] = xx.pm;
+    if (predMean) {
+      for(let i = 0; i <xx.pm.length; i++) {
+        for (let j = 0; j < object.statenames.length; j++) {
+          if(Object.keys(xx.pm)[i] === object.statenames[j]) {
+            predm[nt][j] =xx.pm[object.statenames[j]];
+          }
+        }
+      }
+    }
 
     if (predVar)
       predv[nt] = xx.pv;
