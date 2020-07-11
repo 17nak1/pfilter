@@ -151,7 +151,7 @@ let pomp = class Pomp {
         for(let k = 0; k < nCovarnames; k++)
             point[this.covarnames[k]] = +this.covar[0][k];
     }
-
+ 
     if (t <= this.tcovar[0]) {
         for(let k = 0; k < nCovarnames; k++)
             point[this.covarnames[k]] = +this.covar[0][k] + (t - this.tcovar[0]) * (this.covar[1][k] - this.covar[0][k]) / (this.tcovar[1] -this.tcovar[0])

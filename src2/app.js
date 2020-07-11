@@ -10,7 +10,7 @@ let { pfilter } = require('./pfilter.js');
 let pomp = require('./pomp.js');
 
 
-rootDir = '.'
+rootDir = '..'
 
 let dataCases = [];
 let dataCasesTimes = [];
@@ -89,17 +89,14 @@ const mypomp = new pomp({
   obsnames: dataCases_name,
 });
 let t = new Date()
-let pf = pfilter({object: mypomp, params: currentParams, Np: 200, filterMean: true, predMean: true, maxFail: 3000})
+let pf = pfilter({object: mypomp, params: currentParams, Np: 20000, filterMean: true, predMean: true, maxFail: 3000})
 
 console.log(new Date() - t, pf.loglik)
 
 let createCsvWriter = require('csv-writer').createArrayCsvWriter;
   let csvWriter = createCsvWriter({
     header: [],
-    path: './samples/predmean.csv',
-    append : true
+    path: rootDir+'/samples/predmean.csv',
   })
-  csvWriter.writeRecords( pf.predMean)
-  .then(() => {
-  console.log('...loglik ')
-  })
+csvWriter.writeRecords( pf.predMean)
+  
