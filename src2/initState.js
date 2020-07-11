@@ -28,6 +28,8 @@ const do_init_state = function (object, params, ns) {
   //   }
   // }
   Object.assign(paramsObj , object.interpolator(object.t0))
-  let initVector =  object.initializer(paramsObj);  
-  return  new Array(ns).fill(null).map(a => initVector);
+  paramsObj.t = object.t0;
+  paramsObj.dt = object.dt;
+  object.initializer(paramsObj);  
+  return  new Array(ns).fill(null).map(a => ({...paramsObj}));
 }

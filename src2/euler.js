@@ -50,7 +50,8 @@ exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
     for (let k = 0; k < nstep; k++) { // loop over Euler steps
       let  interpolatorObj = object.interpolator(t);
       for (let j = 0 ; j < nreps; j++) { // loop over replicates
-         xt[j] = func(object, xt[j], params[j], t, dt, interpolatorObj);
+        Object.assign(xt[j],interpolatorObj, {t: t, dt: dt});
+        func(xt[j]);
       }
       t += dt;
 

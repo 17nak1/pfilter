@@ -35,7 +35,6 @@ exports.pfilter = function (args) {
     object.coef = params;
     params = [params]; //as.matrix(params)
   }
-
   let initx = initState(object, params, Np);
   let nvars = Object.keys(initx[0]).length;
   let x = initx;

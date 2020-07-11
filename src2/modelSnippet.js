@@ -40,22 +40,22 @@ let dataIndex = {
 }
 
 
-snippet.rprocess = function (pomp, states, params, t, deltaT, interpolatorObj) {
+snippet.rprocess = function (args) {
   
-  let S = states.S;
-  let E = states.E;
-  let I = states.I;
-  let R = states.R;
-  let H = states.H;
+  let S = args.S;
+  let E = args.E;
+  let I = args.I;
+  let R = args.R;
+  let H = args.H;
 
-  let R0 = params.R0;
-  let amplitude = params.amplitude;
-  let gamma = params.gamma;
-  let mu = params.mu;
-  let sigma = params.sigma ;
+  let R0 = args.R0;
+  let amplitude = args.amplitude;
+  let gamma = args.gamma;
+  let mu = args.mu;
+  let sigma = args.sigma ;
 
-  let pop =interpolatorObj.pop;
-  let birthrate = interpolatorObj.birthrate;
+  let pop =args.pop;
+  let birthrate = args.birthrate;
   let seas, beta, beta0, foi, tt, va;
   let length = 3;
   let trans = new Array(length * 2).fill(0);
@@ -65,7 +65,7 @@ snippet.rprocess = function (pomp, states, params, t, deltaT, interpolatorObj) {
   
   beta0 = R0 * (gamma + mu) * (sigma + mu) / sigma;
   va = 0;
-  tt = (t - Math.floor(t)) * 365.25
+  tt = (args.t - Math.floor(args.t)) * 365.25
   if ((tt >= 7 && tt <= 100) || (tt >= 115 && tt <= 199) || (tt >= 252 && tt <= 300) || (tt >= 308 && tt <= 356)) {
     seas = 1 + amplitude * 0.2411 / 0.7589
   } else {
@@ -80,36 +80,34 @@ snippet.rprocess = function (pomp, states, params, t, deltaT, interpolatorObj) {
   rate[4] = gamma          // recovery
   rate[5] = mu             // natural I death 
    
-  let births = rpois.rpoisOne(birthrate * (1 - va) * deltaT )// Poisson births
-  mathLib.reulermultinom(2, Math.round(S), 0, deltaT, 0, rate, trans)
-  mathLib.reulermultinom(2, Math.round(E), 2, deltaT, 2, rate, trans)
-  mathLib.reulermultinom(2, Math.round(I), 4, deltaT, 4, rate, trans)
-  S += (births - trans[0] - trans[1])
-  E += (trans[0] - trans[2] - trans[3]) 
-  I += (trans[2] - trans[4] - trans[5]) 
-  R = pop - S - E - I
-  H += trans[4] 
-  return {S, E, I, R, H}
+  let births = rpois.rpoisOne(birthrate * (1 - va) * args.dt )// Poisson births
+  mathLib.reulermultinom(2, Math.round(S), 0, args.dt, 0, rate, trans)
+  mathLib.reulermultinom(2, Math.round(E), 2, args.dt, 2, rate, trans)
+  mathLib.reulermultinom(2, Math.round(I), 4, args.dt, 4, rate, trans)
+  args.S += (births - trans[0] - trans[1])
+  args.E += (trans[0] - trans[2] - trans[3]) 
+  args.I += (trans[2] - trans[4] - trans[5]) 
+  args.R = pop - S - E - I
+  args.H += trans[4] 
 }
 
 snippet.initz = function(args) {
   
   let m = args.pop / (args.S_0 + args.E_0 + args.R_0 + args.I_0);
-  let S_0 = Math.round(m * args.S_0);
-  let E_0 = Math.round(m * args.E_0);
-  let I_0 = Math.round(m * args.I_0);
-  let R_0 = Math.round(m * args.R_0);
-  let H_0 = 0;
-  return {S:S_0, E:E_0, I:I_0, R:R_0, H:H_0};
+  args.S = Math.round(m * args.S_0);
+  args.E = Math.round(m * args.E_0);
+  args.I = Math.round(m * args.I_0);
+  args.R = Math.round(m * args.R_0);
+  args.H = 0;
 }
 
-snippet.dmeasure = function (pomp, data , hidden_state, params, giveLog = 1) {
+snippet.dmeasure = function (args) {
   
   let lik
-  let rho = params.rho;
-  let psi = params.psi;
-  let H = hidden_state.H;
-  let cases = data[0];//[dataIndex['cases
+  let rho = args.rho;
+  let psi = args.psi;
+  let H = args.H;
+  let cases = args.y[0];//[dataIndex['cases
 
   let tol = 1.0e-18
   let mn = rho * H;
@@ -122,9 +120,9 @@ snippet.dmeasure = function (pomp, data , hidden_state, params, giveLog = 1) {
     } else {
       lik = mathLib.pnorm((modelCases + 0.5, mn, Math.sqrt(v) + tol)) + tol;
     }
-    if (giveLog) lik = Math.log(lik);
+    if (args.giveLog) lik = Math.log(lik);
   } else {
-    lik = (giveLog) ? 0 : 1;
+    lik = (args.giveLog) ? 0 : 1;
   }
   return lik
 }
