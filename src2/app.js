@@ -34,6 +34,7 @@ for (let i = 1; i < lines.length; i++) {
 }
 
 //* 2nd data set
+let data;
 file = fs.readFileSync(rootDir+'/samples/London_BiDataMain.csv').toString()
 lines = file.split(/\r\n|\n/);
 let dataCases_name = lines[0].replace(/['"]+/g, '').split(',');
@@ -43,7 +44,11 @@ for (let i = 1; i < lines.length ; i++) {
   if(temp.length > 1) {
     temp = temp.map(x => Number(x));
     dataCasesTimes.push(temp[0]);
-    dataCases.push(temp.slice(1));
+    data = {};
+    for(let j = 0; j < temp.length - 1; j++){
+      data[dataCases_name[j]] = temp[j + 1];
+    }
+    dataCases.push(data)
   }
 }
 
@@ -54,11 +59,10 @@ let currentParams_name = lines[0].replace(/['"]+/g, '').split(',');
 for (let i = 1; i < lines.length ; i++) {
   temp = lines[i].split(',');
   if(temp.length > 1) {
-    temp = temp.map(function (x) {return Number(x)});
+    temp = temp.map(x => Number(x));
     for(let j = 0; j < temp.length; j++){
       currentParams[currentParams_name[j]] = temp[j];
     }
-    
   }
 }
 
@@ -89,7 +93,7 @@ const mypomp = new pomp({
   obsnames: dataCases_name,
 });
 let t = new Date()
-let pf = pfilter({object: mypomp, params: currentParams, Np: 20000, filterMean: true, predMean: true, maxFail: 3000})
+let pf = pfilter({object: mypomp, params: currentParams, Np: 200, filterMean: true, predMean: true, maxFail: 3000})
 
 console.log(new Date() - t, pf.loglik)
 

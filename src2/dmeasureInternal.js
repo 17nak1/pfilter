@@ -29,7 +29,7 @@ const do_dmeasure = function (object, y, x, times, params, give_log) {
    for (k = 0; k < ntimes; k++) { // loop over times.Note:Only ntimes = 1 in ths translation
     for (let j = 0; j < nreps; j++) { // loop over replicates
       if (nrepsp === 1) params[j] = params[0];
-      F[j] = ff(object, y, x[j], params[j],give_log);
+      F[j] = ff(y, x[j], params[j],give_log);
     }
   }
   return F;

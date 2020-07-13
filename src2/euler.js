@@ -1,6 +1,4 @@
 const mathLib = require("./mathLib");
-const { Z_BINARY } = require("zlib");
-
 
 exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
    method, object)
@@ -50,7 +48,7 @@ exports.euler_model_simulator  = function(func, xstart, times, params, deltat,
     for (let k = 0; k < nstep; k++) { // loop over Euler steps
       let  interpolatorObj = object.interpolator(t);
       for (let j = 0 ; j < nreps; j++) { // loop over replicates
-         xt[j] = func(object, xt[j], params[j], t, dt, interpolatorObj);
+         xt[j] = func(xt[j], params[j], t, dt, interpolatorObj);
       }
       t += dt;
 

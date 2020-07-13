@@ -87,8 +87,8 @@ exports.pfilter = function (args) {
   for (nt = 0; nt < ntimes; nt++) {
     try {
       X = rprocessInternal(object, x, [times[nt],times[nt + 1]], params, 1)
-    } catch (error) {
-      throw new Error(`In pfilterInternal: Process simulation error: ${error}`)
+    } catch (e) {
+      console.error(`In pfilterInternal: Process simulation error: ${e}`)
     }
   
     if (predVar) { // check for nonfinite state variables and parameters
